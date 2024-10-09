@@ -1,4 +1,17 @@
+
 spring:
+    datasource:
+        url: jdbc:mariadb://localhost:3306/chaea?useSSL=false&autoReconnect=true&useTimezone=true&serverTimezone=UTC-5
+        username: root
+        password: root
+        driver-class-name: org.mariadb.jdbc.Driver
+    jpa:
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.MySQLDialect
+        hibernate:
+            ddl-auto: create-drop
+        generate-ddl: true
     application:
         name: chaea
     security:
