@@ -1,5 +1,7 @@
 package com.example.chaea.entities;
 
+import java.sql.Date;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,9 +18,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "profesor")
-public class Profesor {
-
+@Table(name = "estudiante")
+public class Estudiante {
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
@@ -27,13 +29,7 @@ public class Profesor {
 	@JoinColumn(name = "usuario_email",nullable = false)
 	private Usuario usuario;
 	
-	@Column(length = 50,nullable = false)
-	private String carrera;
+	private byte genero;
 	
-	@ManyToOne
-	@JoinColumn(name = "id_rol",nullable = false)
-	private Rol rol;
-	
-	@Column(length = 100,nullable = false)
-	private String estado;
+	private Date fecha_nacimiento;
 }
