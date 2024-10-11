@@ -17,15 +17,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "profesor")
-public class Profesor {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
-	
-	@ManyToOne
-	@JoinColumn(name = "usuario_email",nullable = false)
-	private Usuario usuario;
+public class Profesor extends Usuario{
 	
 	@Column(length = 50,nullable = false)
 	private String carrera;
@@ -36,4 +28,17 @@ public class Profesor {
 	
 	@Column(length = 100,nullable = false)
 	private String estado;
+	
+	public Profesor() {
+	    
+	}
+
+    public Profesor(String email, String nombre, String codigo, String carrera, String estado) {
+        super(email, nombre, codigo);
+        this.carrera = carrera;
+        this.estado = estado;
+        this.rol = new Rol();
+    }
+	
+	
 }
