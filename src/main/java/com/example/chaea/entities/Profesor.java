@@ -2,24 +2,23 @@ package com.example.chaea.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "profesor")
 public class Profesor extends Usuario{
 	
 	@Column(length = 50,nullable = false)
+	@Getter
+	@Setter
 	private String carrera;
 	
 	@ManyToOne
@@ -27,6 +26,8 @@ public class Profesor extends Usuario{
 	private Rol rol;
 	
 	@Column(length = 100,nullable = false)
+	@Getter
+	@Setter
 	private String estado;
 	
 	public Profesor() {
