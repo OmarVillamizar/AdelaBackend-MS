@@ -1,4 +1,4 @@
-package com.example.chaea.util;
+package com.example.chaea.security;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -42,6 +42,7 @@ public class JwtUtil {
 
     // Generar el token JWT
     public String generateToken(Usuario userDetails) {
+        
         return createToken(userDetails);
     }
 

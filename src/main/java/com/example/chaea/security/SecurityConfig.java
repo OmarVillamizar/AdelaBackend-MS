@@ -1,4 +1,4 @@
-package com.example.chaea.config;
+package com.example.chaea.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -17,9 +17,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.example.chaea.filters.JwtFilter;
-
 import jakarta.servlet.http.HttpServletRequest;
+
 
 
 @Configuration
@@ -28,28 +27,14 @@ public class SecurityConfig {
     
     @Autowired
     private JwtFilter jwtFilter;
-    
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
-        /*
-        http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/", "/login", "/docs/**", "/api-docs/**", "/swagger-ui/**", "/health/**").permitAll()
-                .anyRequest().authenticated())
-                .oauth2Login(oauth2 -> oauth2.loginPage("/login").defaultSuccessUrl("/home", true))
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())  // Manejador de errores
-                        .jwt(jwt -> jwt
-                                .decoder(jwtDecoder())
-                                .jwtAuthenticationConverter(jwtAuthenticationConverter())) //Configura la validación JWT usando el JwtDecoder
-                    )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .logout(logout -> logout.logoutSuccessUrl("/").permitAll());
-                */
+    SecurityFilterChain securityFilterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
         http
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers("/", "/docs/**", "/api-docs/**", "/swagger-ui/**", "/health/**", "/login/**", "/oauth2/**").permitAll()
+            .requestMatchers("/test/**").hasAuthority("ESTUDIANTE")
             .anyRequest().authenticated()
         )
         .oauth2Login(oauth2 -> oauth2
@@ -129,15 +114,15 @@ public class SecurityConfig {
             }
         };
     }
-    
+
     @Bean
-    public JwtDecoder jwtDecoder() {
+    JwtDecoder jwtDecoder() {
         // Usa NimbusJwtDecoder para decodificar el token JWT, debes configurar la URI del emisor
         return NimbusJwtDecoder.withJwkSetUri("https://www.googleapis.com/oauth2/v3/certs").build();
     }
 
     @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+    JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         // Configura aquí la conversión de claims, roles o cualquier otra lógica
         return converter;
