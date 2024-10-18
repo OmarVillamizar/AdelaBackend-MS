@@ -26,7 +26,7 @@ public class Profesor extends Usuario{
 	private String carrera;
 	
 	@ManyToOne
-	@JoinColumn(name = "id_rol",nullable = true)
+	@JoinColumn(name = "rol_id",nullable = true)
 	private Rol rol;
 	
 	@Column(length = 100,nullable = true)
