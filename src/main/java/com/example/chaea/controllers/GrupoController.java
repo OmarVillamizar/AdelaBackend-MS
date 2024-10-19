@@ -2,7 +2,6 @@ package com.example.chaea.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import com.example.chaea.dto.GrupoDTO;
 import com.example.chaea.entities.Estudiante;
 import com.example.chaea.entities.Grupo;
@@ -30,7 +29,6 @@ public class GrupoController {
     public Grupo crearGrupo(@RequestBody GrupoDTO grupoDTO) {
         // Buscar el profesor por su correo electrónico
         Optional<Profesor> profesorOpt = profesorRepository.findById(grupoDTO.getProfesorEmail());
-
         if (!profesorOpt.isPresent()) {
             throw new IllegalArgumentException("Profesor no encontrado con el correo: " + grupoDTO.getProfesorEmail());
         }
@@ -47,7 +45,6 @@ public class GrupoController {
         Set<Estudiante> estudiantesAsignados = new HashSet<>();
         for (String email : grupoDTO.getCorreosEstudiantes()) {
             Optional<Estudiante> estudianteOpt = estudianteRepository.findById(email);
-
             if (estudianteOpt.isPresent()) {
                 Estudiante estudiante = estudianteOpt.get();
                 estudiantesAsignados.add(estudiante);
@@ -79,7 +76,7 @@ public class GrupoController {
     @DeleteMapping("/{id}")
     public void eliminarGrupo(@PathVariable int id) {
         Optional<Grupo> grupoOpt = grupoRepository.findById(id);
-        
+
         if (grupoOpt.isPresent()) {
             Grupo grupo = grupoOpt.get();
             // Desvincular los estudiantes del grupo
@@ -95,7 +92,6 @@ public class GrupoController {
     @PutMapping("/{id}")
     public Grupo actualizarGrupo(@PathVariable int id, @RequestBody GrupoDTO grupoDTO) {
         Optional<Grupo> grupoOptional = grupoRepository.findById(id);
-
         if (grupoOptional.isPresent()) {
             Grupo grupoExistente = grupoOptional.get();
             grupoExistente.setNombre(grupoDTO.getNombre());
@@ -110,7 +106,6 @@ public class GrupoController {
             Set<Estudiante> estudiantesAsignados = new HashSet<>();
             for (String email : grupoDTO.getCorreosEstudiantes()) {
                 Optional<Estudiante> estudianteOpt = estudianteRepository.findById(email);
-
                 if (estudianteOpt.isPresent()) {
                     Estudiante estudiante = estudianteOpt.get();
                     estudiantesAsignados.add(estudiante);
@@ -124,5 +119,19 @@ public class GrupoController {
             return grupoRepository.save(grupoExistente);
         }
         return null;
+    }
+
+    @DeleteMapping("/nombre/{nombre}")
+    public void eliminarGrupoPorNombre(@PathVariable String nombre) {
+        List<Grupo> grupos = grupoRepository.findByNombre(nombre);
+        for (Grupo grupo : grupos) {
+            // Desvincular los estudiantes del grupo
+            for (Estudiante estudiante : grupo.getEstudiantes()) {
+                estudiante.getGrupos().remove(grupo);
+                estudianteRepository.save(estudiante); // Actualizar el estudiante
+            }
+            // Eliminar el grupo
+            grupoRepository.delete(grupo);
+        }
     }
 }
