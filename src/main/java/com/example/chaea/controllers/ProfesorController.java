@@ -1,19 +1,22 @@
 package com.example.chaea.controllers;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.chaea.dto.ProfesorDTO;
 import com.example.chaea.entities.Profesor;
 import com.example.chaea.entities.Rol;
+import com.example.chaea.repositories.ProfesorRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/profesores")
+@RequestMapping("/api/profesores")
 public class ProfesorController {
 
-    private List<Profesor> profesores = new ArrayList<>();
+    @Autowired
+    private ProfesorRepository profesorRepository;
 
     @PostMapping
     public Profesor crearProfesor(@RequestBody ProfesorDTO profesorDTO) {
@@ -27,35 +30,28 @@ public class ProfesorController {
             profesorDTO.getEstadoProfesor()
         );
         profesor.setRol(rol);
-        profesores.add(profesor);
-        return profesor;
+        return profesorRepository.save(profesor);
     }
 
     @GetMapping
     public List<Profesor> listarProfesores() {
-        return profesores;
+        return profesorRepository.findAll();
+    }
+
+    @GetMapping("/{email}")
+    public Profesor consultarPorCorreo(@PathVariable String email) {
+        Optional<Profesor> profesorOptional = profesorRepository.findById(email);
+        return profesorOptional.orElse(null);
     }
 
     @DeleteMapping("/{email}")
     public void eliminarProfesor(@PathVariable String email) {
-        profesores.removeIf(profesor -> profesor.getEmail().equals(email));
-    }
-    
-    @GetMapping("/{email}")
-    public Profesor consultarPorEmail(@PathVariable String email) {
-        Optional<Profesor> profesorOptional = profesores.stream()
-                .filter(profesor -> profesor.getEmail().equals(email))
-                .findFirst();
-
-        return profesorOptional.orElse(null);
+        profesorRepository.deleteById(email);
     }
 
     @PutMapping("/{email}")
     public Profesor actualizarProfesor(@PathVariable String email, @RequestBody ProfesorDTO profesorDTO) {
-        Optional<Profesor> profesorOptional = profesores.stream()
-                .filter(profesor -> profesor.getEmail().equals(email))
-                .findFirst();
-
+        Optional<Profesor> profesorOptional = profesorRepository.findById(email);
         if (profesorOptional.isPresent()) {
             Profesor profesorExistente = profesorOptional.get();
             profesorExistente.setNombre(profesorDTO.getNombre());
@@ -64,7 +60,7 @@ public class ProfesorController {
             profesorExistente.setRol(obtenerRolPorId(profesorDTO.getRolId()));
             profesorExistente.setEstadoProfesor(profesorDTO.getEstadoProfesor());
             profesorExistente.setEstado(profesorDTO.getEstado());
-            return profesorExistente;
+            return profesorRepository.save(profesorExistente);
         }
         return null;
     }

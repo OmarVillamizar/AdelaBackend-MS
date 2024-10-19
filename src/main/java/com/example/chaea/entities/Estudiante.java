@@ -1,7 +1,10 @@
 package com.example.chaea.entities;
 
 import java.sql.Date;
+import java.util.Objects;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Entity;
@@ -19,26 +22,27 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 @Table(name = "estudiante")
-public class Estudiante extends Usuario{
-	
+public class Estudiante extends Usuario {
+
     @Enumerated
     @Nullable
-	private Genero genero;
-	
+    private Genero genero;
+
     @Nullable
-	private Date fecha_nacimiento;
-	
-	@ManyToMany
-	@JoinTable(
-	  name = "matricula", 
-	  joinColumns = @JoinColumn(name = "estudiante_id"), 
-	  inverseJoinColumns = @JoinColumn(name = "curso_id"))
-	private Set<Grupo> grupos;
-	
-	
-	public Estudiante() {
-	    super();
-	}
+    private Date fecha_nacimiento;
+
+    @ManyToMany
+    @JoinTable(
+        name = "matricula",
+        joinColumns = @JoinColumn(name = "estudiante_id"),
+        inverseJoinColumns = @JoinColumn(name = "curso_id")
+    )
+    @JsonBackReference
+    private Set<Grupo> grupos;
+
+    public Estudiante() {
+        super();
+    }
 
     public Estudiante(String email, String nombre, String codigo, Genero genero, Date fechaNac, UsuarioEstado estado) {
         super(email, nombre, codigo, estado);
@@ -46,22 +50,16 @@ public class Estudiante extends Usuario{
         this.fecha_nacimiento = fechaNac;
     }
 
-    public Genero getGenero() {
-        return genero;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Estudiante)) return false;
+        Estudiante that = (Estudiante) o;
+        return Objects.equals(getEmail(), that.getEmail());
     }
 
-    public void setGenero(Genero genero) {
-        this.genero = genero;
+    @Override
+    public int hashCode() {
+        return Objects.hash(getEmail());
     }
-
-    public Date getFecha_nacimiento() {
-        return fecha_nacimiento;
-    }
-
-    public void setFecha_nacimiento(Date fecha_nacimiento) {
-        this.fecha_nacimiento = fecha_nacimiento;
-    }
-	
-    
-	
 }
