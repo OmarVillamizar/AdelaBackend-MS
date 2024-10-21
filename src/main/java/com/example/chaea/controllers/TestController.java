@@ -17,6 +17,7 @@ public class TestController {
     private static final Logger logger = LoggerFactory.getLogger(TestController.class);
     
     @GetMapping("/test/est")
+    @PreAuthorize("hasRole('ESTUDIANTE')")
     public String test() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         
@@ -25,6 +26,7 @@ public class TestController {
     }
     
     @GetMapping("/test/prof")
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
     public String testProf() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         
@@ -33,6 +35,7 @@ public class TestController {
     }
     
     @GetMapping("/test/admin")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public String testAdmin() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         

@@ -3,6 +3,7 @@ package com.example.chaea.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -24,6 +25,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
     
     @Autowired
@@ -35,10 +37,9 @@ public class SecurityConfig {
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers("/", "/docs/**", "/api-docs/**", "/swagger-ui/**", "/health/**", "/login/**", "/oauth2/**").permitAll()
-            .requestMatchers("/test/test/est").hasAuthority("ESTUDIANTE")
-            .requestMatchers("/test/test/prof").hasAnyAuthority("PROFESOR","ADMINISTRADOR")
-                        .requestMatchers("/test/test/admin").hasAuthority("ADMINISTRADOR").anyRequest()
-                        .authenticated()
+            .requestMatchers("/test/**").authenticated()
+            .anyRequest()
+            .authenticated()
         )
         .exceptionHandling(exc -> exc
                 .authenticationEntryPoint((request, response, authException) -> {

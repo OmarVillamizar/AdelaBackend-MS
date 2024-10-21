@@ -62,7 +62,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     if(user instanceof Profesor) {
                         Profesor profe = (Profesor) user;
                         if(profe.getEstado() == UsuarioEstado.ACTIVA && profe.getEstadoProfesor() == ProfesorEstado.ACTIVA) {
-                            permisos.add(new SimpleGrantedAuthority(profe.getRol().getDescripcion()));
+                            permisos.add(new SimpleGrantedAuthority("ROLE_"+profe.getRol().getDescripcion()));
                         }
                         
                         authenticationToken = new UsernamePasswordAuthenticationToken(
@@ -70,7 +70,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     }else if(user instanceof Estudiante) {
                         Estudiante estud = (Estudiante) user;
                         if(estud.getEstado() == UsuarioEstado.ACTIVA) {
-                            permisos.add(new SimpleGrantedAuthority("ESTUDIANTE"));
+                            permisos.add(new SimpleGrantedAuthority("ROLE_ESTUDIANTE"));
                         }
                         Hibernate.initialize(estud.getGrupos());
                         authenticationToken = new UsernamePasswordAuthenticationToken(
