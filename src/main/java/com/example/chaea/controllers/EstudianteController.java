@@ -4,6 +4,7 @@ import com.example.chaea.dto.EstudianteDTO;
 import com.example.chaea.dto.GrupoResumidoDTO;
 import com.example.chaea.entities.Estudiante;
 import com.example.chaea.entities.Grupo;
+import com.example.chaea.entities.UsuarioEstado;
 import com.example.chaea.repositories.EstudianteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -50,6 +51,7 @@ public class EstudianteController {
             estudianteDTO.getFechaNacimiento(),
             estudianteDTO.getEstado()
         );
+        estudiante.setEstado(UsuarioEstado.INCOMPLETA);
         return ResponseEntity.ok(estudianteRepository.save(estudiante));
     }
 

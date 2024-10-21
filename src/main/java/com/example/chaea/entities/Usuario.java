@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Entity
@@ -27,6 +28,7 @@ public abstract class Usuario {
     private String codigo;
     
     @Enumerated(EnumType.STRING)
+    @NotNull
     private UsuarioEstado estado;
     
     public Usuario() {

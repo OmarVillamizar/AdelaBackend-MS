@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 
 
@@ -34,8 +35,15 @@ public class SecurityConfig {
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers("/", "/docs/**", "/api-docs/**", "/swagger-ui/**", "/health/**", "/login/**", "/oauth2/**").permitAll()
-            .requestMatchers("/test/**").hasAuthority("ESTUDIANTE")
-            .anyRequest().authenticated()
+            .requestMatchers("/test/test/est").hasAuthority("ESTUDIANTE")
+            .requestMatchers("/test/test/prof").hasAnyAuthority("PROFESOR","ADMINISTRADOR")
+                        .requestMatchers("/test/test/admin").hasAuthority("ADMINISTRADOR").anyRequest()
+                        .authenticated()
+        )
+        .exceptionHandling(exc -> exc
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                })
         )
         .oauth2Login(oauth2 -> oauth2
             .authorizationEndpoint(authorization -> authorization

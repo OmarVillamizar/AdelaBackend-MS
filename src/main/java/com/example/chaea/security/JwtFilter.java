@@ -1,9 +1,11 @@
 package com.example.chaea.security;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,9 +14,14 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.example.chaea.entities.Estudiante;
+import com.example.chaea.entities.Profesor;
+import com.example.chaea.entities.ProfesorEstado;
 import com.example.chaea.entities.Usuario;
+import com.example.chaea.entities.UsuarioEstado;
 import com.example.chaea.repositories.UsuarioRepository;
 
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,24 +45,58 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = null;
         String email = null;
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            token = authorizationHeader.substring(7);
-            email = jwtUtil.extractEmail(token);
-        }
-
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            Optional<Usuario> userDetails = usuarioRepository.findByEmail(email);
-
-            if (userDetails.isPresent() && jwtUtil.validateToken(token, userDetails.get())) {
-                Usuario user = userDetails.get();
-                System.out.println("Class of "+ user.getClass().getName());
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails.get(), null, List.of(new SimpleGrantedAuthority("ESTUDIANTE")));
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        try {
+            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+                token = authorizationHeader.substring(7);
+                email = jwtUtil.extractEmail(token);
             }
-        }
 
-        filterChain.doFilter(request, response);
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                Optional<Usuario> userDetails = usuarioRepository.findByEmail(email);
+
+                if (userDetails.isPresent() && jwtUtil.validateToken(token, userDetails.get())) {
+                    Usuario user = userDetails.get();
+                    System.out.println("Class of "+ user.getClass().getName());
+                    UsernamePasswordAuthenticationToken authenticationToken;
+                    List<SimpleGrantedAuthority> permisos = new LinkedList<SimpleGrantedAuthority>();
+                    if(user instanceof Profesor) {
+                        Profesor profe = (Profesor) user;
+                        if(profe.getEstado() == UsuarioEstado.ACTIVA && profe.getEstadoProfesor() == ProfesorEstado.ACTIVA) {
+                            permisos.add(new SimpleGrantedAuthority(profe.getRol().getDescripcion()));
+                        }
+                        
+                        authenticationToken = new UsernamePasswordAuthenticationToken(
+                                userDetails.get(), null, permisos);
+                    }else if(user instanceof Estudiante) {
+                        Estudiante estud = (Estudiante) user;
+                        if(estud.getEstado() == UsuarioEstado.ACTIVA) {
+                            permisos.add(new SimpleGrantedAuthority("ESTUDIANTE"));
+                        }
+                        Hibernate.initialize(estud.getGrupos());
+                        authenticationToken = new UsernamePasswordAuthenticationToken(
+                                userDetails.get(), null, permisos);
+                    }else {
+                        throw new RuntimeException("El usuario no está relacionado a ninguna cuenta");
+                    }
+                    logger.info("permises: "+permisos.toString());
+                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                    
+                    
+
+                }
+                
+            }
+            filterChain.doFilter(request, response);
+        } catch (SignatureException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("Invalid JWT token");
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            e.printStackTrace();
+            response.getWriter().write("Error in JWT token filter: "+e.getMessage());
+        }
+        
+
     }
 }

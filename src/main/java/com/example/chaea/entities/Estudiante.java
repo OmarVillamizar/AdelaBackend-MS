@@ -1,6 +1,7 @@
 package com.example.chaea.entities;
 
 import java.sql.Date;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -9,17 +10,16 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 @Entity
 @Data
-@EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 @Table(name = "estudiante")
 public class Estudiante extends Usuario {
@@ -31,14 +31,16 @@ public class Estudiante extends Usuario {
     @Nullable
     private Date fecha_nacimiento;
 
-    @ManyToMany
+    @ManyToMany(
+        fetch = FetchType.EAGER
+    )
     @JoinTable(
         name = "matricula",
         joinColumns = @JoinColumn(name = "estudiante_id"),
         inverseJoinColumns = @JoinColumn(name = "curso_id")
     )
     @JsonBackReference
-    private Set<Grupo> grupos;
+    private Set<Grupo> grupos = new HashSet<Grupo>();
 
     public Estudiante() {
         super();
