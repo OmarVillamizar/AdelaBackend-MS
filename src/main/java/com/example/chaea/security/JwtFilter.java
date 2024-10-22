@@ -41,7 +41,6 @@ public class JwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         
         String authorizationHeader = request.getHeader("Authorization");
-        logger.info("Enter jwtfilter "+authorizationHeader);
         String token = null;
         String email = null;
 
@@ -50,13 +49,12 @@ public class JwtFilter extends OncePerRequestFilter {
                 token = authorizationHeader.substring(7);
                 email = jwtUtil.extractEmail(token);
             }
-
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 Optional<Usuario> userDetails = usuarioRepository.findByEmail(email);
-
                 if (userDetails.isPresent() && jwtUtil.validateToken(token, userDetails.get())) {
+                    
                     Usuario user = userDetails.get();
-                    System.out.println("Class of "+ user.getClass().getName());
+                    
                     UsernamePasswordAuthenticationToken authenticationToken;
                     List<SimpleGrantedAuthority> permisos = new LinkedList<SimpleGrantedAuthority>();
                     if(user instanceof Profesor) {
@@ -64,7 +62,12 @@ public class JwtFilter extends OncePerRequestFilter {
                         if(profe.getEstado() == UsuarioEstado.ACTIVA && profe.getEstadoProfesor() == ProfesorEstado.ACTIVA) {
                             permisos.add(new SimpleGrantedAuthority("ROLE_"+profe.getRol().getDescripcion()));
                         }
-                        
+                        if(profe.getEstado() == UsuarioEstado.INCOMPLETA) {
+                            response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
+                            response.getWriter().write("El usuario cuenta con una cuenta incompleta");
+                            response.flushBuffer();
+                            return;
+                        }
                         authenticationToken = new UsernamePasswordAuthenticationToken(
                                 userDetails.get(), null, permisos);
                     }else if(user instanceof Estudiante) {
@@ -72,17 +75,20 @@ public class JwtFilter extends OncePerRequestFilter {
                         if(estud.getEstado() == UsuarioEstado.ACTIVA) {
                             permisos.add(new SimpleGrantedAuthority("ROLE_ESTUDIANTE"));
                         }
+                        if(estud.getEstado() == UsuarioEstado.INCOMPLETA) {
+                            response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
+                            response.getWriter().write("El usuario cuenta con una cuenta incompleta");
+                            response.flushBuffer();
+                            return;
+                        }
                         Hibernate.initialize(estud.getGrupos());
                         authenticationToken = new UsernamePasswordAuthenticationToken(
                                 userDetails.get(), null, permisos);
                     }else {
                         throw new RuntimeException("El usuario no está relacionado a ninguna cuenta");
                     }
-                    logger.info("permises: "+permisos.toString());
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                    
-                    
 
                 }
                 

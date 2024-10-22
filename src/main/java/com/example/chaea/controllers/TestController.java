@@ -2,12 +2,17 @@ package com.example.chaea.controllers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 
 @RestController
@@ -18,29 +23,38 @@ public class TestController {
     
     @GetMapping("/test/est")
     @PreAuthorize("hasRole('ESTUDIANTE')")
-    public String test() {
+    @SecurityRequirement(name = "bearerAuth") 
+    public ResponseEntity<?> test() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         
-        logger.info("entered test "+auth.getAuthorities().toString());
-        return "estudiante"; // Return index.html
+        logger.info("Principal "+auth.getPrincipal().toString());
+        logger.info("Details "+auth.getDetails().toString());
+        logger.info("Name "+auth.getName().toString());
+        logger.info("Authorities "+auth.getAuthorities().toString());
+        return ResponseEntity.status(HttpStatus.OK).body("estudiante"); // Return index.html
     }
     
     @GetMapping("/test/prof")
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
-    public String testProf() {
+    @SecurityRequirement(name = "bearerAuth") 
+    public ResponseEntity<?> testProf() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         
         logger.info("entered test "+auth.getAuthorities().toString());
-        return "profe"; // Return index.html
+        return ResponseEntity.status(HttpStatus.OK).body("profesor"); // Return index.html
     }
     
     @GetMapping("/test/admin")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
-    public String testAdmin() {
+    @SecurityRequirement(name = "bearerAuth") 
+    public ResponseEntity<?> testAdmin() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         
-        logger.info("entered test "+auth.getAuthorities().toString());
-        return "admin"; // Return index.html
+        logger.info("Principal "+auth.getPrincipal().toString());
+        logger.info("Details "+auth.getDetails().toString());
+        logger.info("Name "+auth.getName().toString());
+        logger.info("Authorities "+auth.getAuthorities().toString());
+        return ResponseEntity.status(HttpStatus.OK).body("administrador"); // Return index.html
     }
     
 }

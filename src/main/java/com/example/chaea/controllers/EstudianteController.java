@@ -9,6 +9,9 @@ import com.example.chaea.repositories.EstudianteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -71,6 +74,7 @@ public class EstudianteController {
         if (!estudianteOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Estudiante no encontrado con el correo: " + email);
         }
+        
         return ResponseEntity.ok(estudianteOptional.get());
     }
 
@@ -90,9 +94,14 @@ public class EstudianteController {
         return ResponseEntity.ok().body("Estudiante eliminado exitosamente.");
     }
 
-    @PutMapping("/{email}")
-    public ResponseEntity<?> actualizarEstudiante(@PathVariable String email, @RequestBody EstudianteDTO estudianteDTO) {
+    @PutMapping
+    @PreAuthorize("hasRole('ESTUDIANTE')")
+    public ResponseEntity<?> actualizarEstudiante(@RequestBody EstudianteDTO estudianteDTO) {
         // Validar formato de correo electrónico
+        Estudiante estud = (Estudiante) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        
+        String email = estud.getEmail();
+        
         if (!EMAIL_PATTERN.matcher(email).matches()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Formato de correo incorrecto: " + email);
         }
@@ -103,11 +112,10 @@ public class EstudianteController {
         }
 
         Estudiante estudianteExistente = estudianteOptional.get();
-        estudianteExistente.setNombre(estudianteDTO.getNombre());
         estudianteExistente.setCodigo(estudianteDTO.getCodigo());
         estudianteExistente.setGenero(estudianteDTO.getGenero());
         estudianteExistente.setFecha_nacimiento(estudianteDTO.getFechaNacimiento());
-        estudianteExistente.setEstado(estudianteDTO.getEstado());
+        estudianteExistente.setEstado(UsuarioEstado.ACTIVA);
 
         return ResponseEntity.ok(estudianteRepository.save(estudianteExistente));
     }
