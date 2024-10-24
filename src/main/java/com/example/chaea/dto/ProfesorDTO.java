@@ -1,21 +1,26 @@
 package com.example.chaea.dto;
 
+
 import com.example.chaea.entities.ProfesorEstado;
+import com.example.chaea.entities.Rol;
 import com.example.chaea.entities.UsuarioEstado;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
-public class ProfesorDTO {
-	private String email;
-    private String nombre;
-    private String codigo;
+public class ProfesorDTO extends UserDTO {
+
     private String carrera;
-    private int rolId;
+    private String rol;
     private ProfesorEstado estadoProfesor;
-    private UsuarioEstado estado;
+    public ProfesorDTO(String email, String nombre, String codigo, UsuarioEstado estado, String carrera, Rol rol, ProfesorEstado profesorEstado) {
+        super(email, nombre, codigo, estado, UserType.PROFESOR);
+        this.carrera = carrera;
+        this.rol = rol == null ? "INACTIVO" : rol.getDescripcion();
+        this.estadoProfesor = profesorEstado;
+    }
 }

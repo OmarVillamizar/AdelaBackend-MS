@@ -21,6 +21,7 @@ import com.example.chaea.entities.Usuario;
 import com.example.chaea.entities.UsuarioEstado;
 import com.example.chaea.repositories.UsuarioRepository;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -29,13 +30,13 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
-
+    
     @Autowired
     private JwtUtil jwtUtil;
-
+    
     @Autowired
     private UsuarioRepository usuarioRepository;
-
+    
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -43,7 +44,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String authorizationHeader = request.getHeader("Authorization");
         String token = null;
         String email = null;
-
+        
         try {
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 token = authorizationHeader.substring(7);
@@ -57,52 +58,50 @@ public class JwtFilter extends OncePerRequestFilter {
                     
                     UsernamePasswordAuthenticationToken authenticationToken;
                     List<SimpleGrantedAuthority> permisos = new LinkedList<SimpleGrantedAuthority>();
-                    if(user instanceof Profesor) {
+                    if (user instanceof Profesor) {
                         Profesor profe = (Profesor) user;
-                        if(profe.getEstado() == UsuarioEstado.ACTIVA && profe.getEstadoProfesor() == ProfesorEstado.ACTIVA) {
-                            permisos.add(new SimpleGrantedAuthority("ROLE_"+profe.getRol().getDescripcion()));
+                        if (profe.getEstado() == UsuarioEstado.ACTIVA
+                                && profe.getEstadoProfesor() == ProfesorEstado.ACTIVA) {
+                            if (profe.getRol() != null)
+                                permisos.add(new SimpleGrantedAuthority("ROLE_" + profe.getRol().getDescripcion()));
                         }
-                        if(profe.getEstado() == UsuarioEstado.INCOMPLETA) {
-                            response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
-                            response.getWriter().write("El usuario cuenta con una cuenta incompleta");
-                            response.flushBuffer();
-                            return;
+                        if (profe.getEstado() == UsuarioEstado.INCOMPLETA) {
+                            permisos.add(new SimpleGrantedAuthority("ROLE_PROFESOR_INCOMPLETO"));
                         }
-                        authenticationToken = new UsernamePasswordAuthenticationToken(
-                                userDetails.get(), null, permisos);
-                    }else if(user instanceof Estudiante) {
+                        authenticationToken = new UsernamePasswordAuthenticationToken(userDetails.get(), null,
+                                permisos);
+                    } else if (user instanceof Estudiante) {
                         Estudiante estud = (Estudiante) user;
-                        if(estud.getEstado() == UsuarioEstado.ACTIVA) {
+                        if (estud.getEstado() == UsuarioEstado.ACTIVA) {
                             permisos.add(new SimpleGrantedAuthority("ROLE_ESTUDIANTE"));
                         }
-                        if(estud.getEstado() == UsuarioEstado.INCOMPLETA) {
-                            response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
-                            response.getWriter().write("El usuario cuenta con una cuenta incompleta");
-                            response.flushBuffer();
-                            return;
+                        if (estud.getEstado() == UsuarioEstado.INCOMPLETA) {
+                            permisos.add(new SimpleGrantedAuthority("ROLE_ESTUDIANTE_INCOMPLETO"));
                         }
                         Hibernate.initialize(estud.getGrupos());
-                        authenticationToken = new UsernamePasswordAuthenticationToken(
-                                userDetails.get(), null, permisos);
-                    }else {
+                        authenticationToken = new UsernamePasswordAuthenticationToken(userDetails.get(), null,
+                                permisos);
+                    } else {
                         throw new RuntimeException("El usuario no está relacionado a ninguna cuenta");
                     }
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-
+                    
                 }
                 
             }
             filterChain.doFilter(request, response);
         } catch (SignatureException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Invalid JWT token");
+        } catch (ExpiredJwtException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write(e.getMessage());
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             e.printStackTrace();
-            response.getWriter().write("Error in JWT token filter: "+e.getMessage());
+            response.getWriter().write("Error in JWT token filter: " + e.getMessage());
         }
         
-
     }
 }

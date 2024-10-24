@@ -7,21 +7,21 @@ import com.example.chaea.entities.UsuarioEstado;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
-public class EstudianteDTO {
-	private String email;
-	
-    private String nombre;
-    
-    private String codigo;
-    
+public class EstudianteDTO extends UserDTO{
+
     private Genero genero;
     
     private Date fechaNacimiento;
-    
-    private UsuarioEstado estado;
+        
+    public EstudianteDTO(String email, String nombre, String codigo, UsuarioEstado estado, Genero genero, Date fechaNacimiento) {
+        super(email, nombre, codigo, estado, UserType.ESTUDIANTE);
+        this.genero = genero;
+        this.fechaNacimiento = fechaNacimiento;
+    }
 }

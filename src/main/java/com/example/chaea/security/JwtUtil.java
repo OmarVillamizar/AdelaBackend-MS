@@ -20,6 +20,7 @@ import io.jsonwebtoken.Jwts;
 public class JwtUtil {
 
     private final String SECRET = "c40b18859af2d07e57a71bfcb7d3508325863293319c5d2f7816741fc734f696";  // Generación de la clave segura
+    private final int HOURS = 1;
 
     // Extraer email del token
     public String extractEmail(String token) {
@@ -51,7 +52,7 @@ public class JwtUtil {
                 .claim("user", userDetails)
                 .subject(userDetails.getEmail())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + (1000 * 60 * 60 * 1)))
+                .expiration(new Date(System.currentTimeMillis() + (1000 * 60 * 60 * HOURS)))
                 .signWith(getSignInKey())
                 .compact();
     }

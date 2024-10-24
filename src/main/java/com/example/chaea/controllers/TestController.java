@@ -22,7 +22,7 @@ public class TestController {
     private static final Logger logger = LoggerFactory.getLogger(TestController.class);
     
     @GetMapping("/test/est")
-    @PreAuthorize("hasRole('ESTUDIANTE')")
+    @PreAuthorize("hasRole('ESTUDIANTE') or hasRole('ESTUDIANTE_INCOMPLETO')")
     @SecurityRequirement(name = "bearerAuth") 
     public ResponseEntity<?> test() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
