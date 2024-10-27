@@ -12,9 +12,7 @@ import lombok.NoArgsConstructor;
 public class GrupoDTO {
 	
     private String nombre;
-    
-    private String profesorEmail;
-    
+        
     private Set<String> correosEstudiantes; // Usaremos los correos de los estudiantes
     
 }

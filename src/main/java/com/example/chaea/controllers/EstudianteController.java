@@ -32,9 +32,8 @@ public class EstudianteController {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@ufps.edu.co$");
     
     /*
-     * Caso contrario, para estudiante, yo sí lo puedo registrar desde acá Por los
-     * casos del csv y tales
-     */
+     * No puedo crear estudiantes siendo profesor
+     /
     @PostMapping
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> crearEstudiante(@RequestBody EstudianteDTO estudianteDTO) {
@@ -60,7 +59,7 @@ public class EstudianteController {
         estudiante.setEstado(UsuarioEstado.INCOMPLETA);
         return ResponseEntity.ok(estudianteRepository.save(estudiante));
     }
-    
+    */
     @GetMapping
     public ResponseEntity<List<Estudiante>> listarEstudiantes() {
         return ResponseEntity.ok(estudianteRepository.findAll());
@@ -81,6 +80,7 @@ public class EstudianteController {
         return ResponseEntity.ok(estudianteOptional.get());
     }
     
+    /*
     @DeleteMapping("/{email}")
     public ResponseEntity<?> eliminarEstudiante(@PathVariable String email) {
         // Validar formato de correo electrónico
@@ -96,9 +96,10 @@ public class EstudianteController {
         estudianteRepository.deleteById(email);
         return ResponseEntity.ok().body("Estudiante eliminado exitosamente.");
     }
+    */
     
     @PutMapping
-    @PreAuthorize("hasRole('ESTUDIANTE') or hasRole('ESTUDIANTE_INACTIVO')")
+    @PreAuthorize("hasRole('ESTUDIANTE') or hasRole('ESTUDIANTE_INCOMPLETO')")
     public ResponseEntity<?> actualizarEstudiante(@RequestBody EstudianteDTO estudianteDTO) {
         // Validar formato de correo electrónico
         Estudiante estud = (Estudiante) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -137,6 +138,7 @@ public class EstudianteController {
     }
     
     @GetMapping("/{email}/grupos")
+    @PreAuthorize("hasRole('ESTUDIANTE') or hasRole('ESTUDIANTE_INCOMPLETO')")
     public ResponseEntity<?> consultarGruposPorCorreo(@PathVariable String email) {
         // Validar formato de correo electrónico
         if (!EMAIL_PATTERN.matcher(email).matches()) {
