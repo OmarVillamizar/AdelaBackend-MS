@@ -187,11 +187,12 @@ public class GrupoController {
     @PostMapping("/{id}/estudiantes")
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> agregarEstudiantesAlGrupo(@PathVariable int id, @RequestBody List<String> emails) {
-        Optional<Grupo> grupoOpt = grupoRepository.findById(id);
-        if (!grupoOpt.isPresent()) {
+        Profesor profesor = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<Grupo> grupoOptional = grupoRepository.findByProfesorAndById(profesor, id);
+        if (!grupoOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Grupo no encontrado con el ID: " + id);
         }
-        Grupo grupo = grupoOpt.get();
+        Grupo grupo = grupoOptional.get();
         List<String> emailsNoEncontrados = new ArrayList<>();
         Set<String> errorEmail = new HashSet<String>();
         // Validar formato de correos electrónicos
@@ -225,15 +226,40 @@ public class GrupoController {
         return ResponseEntity.ok(grupoRepository.save(grupo)); // Actualizar el grupo
     }
     
+  //Método para eliminar UN estudiante de un grupo
+    @DeleteMapping("/{id}/estudiantes/{email}")
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
+    public ResponseEntity<?> eliminarEstudianteDelGrupo(@PathVariable int id, @PathVariable String email) {
+        Profesor profesor = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<Grupo> grupoOptional = grupoRepository.findByProfesorAndById(profesor, id);
+        if (!grupoOptional.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Grupo no encontrado con el ID: " + id);
+        }
+        Grupo grupo = grupoOptional.get();
+        if (!EMAIL_PATTERN.matcher(email).matches())  {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Formato de correo incorrecto: " + email);
+        }
+        Optional<Estudiante> estudianteOpt = estudianteRepository.findById(email);
+        if (!estudianteOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Estudiante no encontrado con el correo: " + email);
+        }
+        Estudiante estudiante = estudianteOpt.get();
+        grupo.getEstudiantes().remove(estudiante);
+        estudiante.getGrupos().remove(grupo);
+        estudianteRepository.save(estudiante);
+        return ResponseEntity.ok(grupoRepository.save(grupo));
+    }
+    
     // Método para eliminar estudiantes de un grupo
     @DeleteMapping("/{id}/estudiantes")
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> eliminarEstudiantesDelGrupo(@PathVariable int id, @RequestBody List<String> emails) {
-        Optional<Grupo> grupoOpt = grupoRepository.findById(id);
-        if (!grupoOpt.isPresent()) {
+        Profesor profesor = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<Grupo> grupoOptional = grupoRepository.findByProfesorAndById(profesor, id);
+        if (!grupoOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Grupo no encontrado con el ID: " + id);
         }
-        Grupo grupo = grupoOpt.get();
+        Grupo grupo = grupoOptional.get();
         List<String> emailsNoEncontrados = new ArrayList<>();
         Set<String> errorEmail = new HashSet<String>();
         // Validar formato de correos electrónicos
