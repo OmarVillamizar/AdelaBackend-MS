@@ -78,7 +78,6 @@ public class JwtFilter extends OncePerRequestFilter {
                         if (estud.getEstado() == UsuarioEstado.INCOMPLETA) {
                             permisos.add(new SimpleGrantedAuthority("ROLE_ESTUDIANTE_INCOMPLETO"));
                         }
-                        Hibernate.initialize(estud.getGrupos());
                         authenticationToken = new UsernamePasswordAuthenticationToken(userDetails.get(), null,
                                 permisos);
                     } else {

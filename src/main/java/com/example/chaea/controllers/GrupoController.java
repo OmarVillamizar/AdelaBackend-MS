@@ -48,8 +48,9 @@ public class GrupoController {
                 }
             }
         }
-        if(errorEmail.size() > 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Los siguientes correos cuentan con un formato erróneo: " + errorEmail.toString());
+        if (errorEmail.size() > 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Los siguientes correos cuentan con un formato erróneo: " + errorEmail.toString());
         }
         // Buscar el profesor por su correo electrónico
         Profesor profesor = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -143,7 +144,7 @@ public class GrupoController {
                 errorEmail.add(email);
             }
         }
-        if(errorEmail.size() > 0) {
+        if (errorEmail.size() > 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Los siguientes correos no cumplen con el formato : " + errorEmail.toString());
         }
@@ -156,20 +157,21 @@ public class GrupoController {
             Optional<Estudiante> estudianteOpt = estudianteRepository.findById(email);
             if (estudianteOpt.isPresent()) {
                 Estudiante estudiante = estudianteOpt.get();
-                if(!grupoExistente.getEstudiantes().contains(estudiante)) {
+                if (!grupoExistente.getEstudiantes().contains(estudiante)) {
                     estudiante.getGrupos().add(grupoExistente);
                     estudiantesAdd.add(estudiante);
                 }
-            }else {
+            } else {
                 noExiste.add(email);
             }
         }
-        if(noExiste.size() > 0) {
+        if (noExiste.size() > 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Los siguientes correos no corresponden a cuentas de estudiante o no existen : " + noExiste.toString());
+                    .body("Los siguientes correos no corresponden a cuentas de estudiante o no existen : "
+                            + noExiste.toString());
         }
-        for(Estudiante e : grupoExistente.getEstudiantes()) {
-            if(!grupoDTO.getCorreosEstudiantes().contains(e.getEmail())) {
+        for (Estudiante e : grupoExistente.getEstudiantes()) {
+            if (!grupoDTO.getCorreosEstudiantes().contains(e.getEmail())) {
                 e.getGrupos().remove(grupoExistente);
                 estudiantesDelete.add(e);
             }
@@ -201,7 +203,7 @@ public class GrupoController {
                 errorEmail.add(email);
             }
         }
-        if(errorEmail.size() > 0) {
+        if (errorEmail.size() > 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Los siguientes correos no cumplen con el formato : " + errorEmail.toString());
         }
@@ -217,7 +219,7 @@ public class GrupoController {
                 estudiantes.add(estudiante);
             }
         }
-       
+        
         if (!emailsNoEncontrados.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Estudiantes no encontrados con los correos: " + emailsNoEncontrados.toString());
@@ -226,7 +228,7 @@ public class GrupoController {
         return ResponseEntity.ok(grupoRepository.save(grupo)); // Actualizar el grupo
     }
     
-  //Método para eliminar UN estudiante de un grupo
+    // Método para eliminar UN estudiante de un grupo
     @DeleteMapping("/{id}/estudiantes/{email}")
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> eliminarEstudianteDelGrupo(@PathVariable int id, @PathVariable String email) {
@@ -236,12 +238,13 @@ public class GrupoController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Grupo no encontrado con el ID: " + id);
         }
         Grupo grupo = grupoOptional.get();
-        if (!EMAIL_PATTERN.matcher(email).matches())  {
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Formato de correo incorrecto: " + email);
         }
         Optional<Estudiante> estudianteOpt = estudianteRepository.findById(email);
         if (!estudianteOpt.isPresent()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Estudiante no encontrado con el correo: " + email);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Estudiante no encontrado con el correo: " + email);
         }
         Estudiante estudiante = estudianteOpt.get();
         grupo.getEstudiantes().remove(estudiante);
@@ -268,7 +271,7 @@ public class GrupoController {
                 errorEmail.add(email);
             }
         }
-        if(errorEmail.size() > 0) {
+        if (errorEmail.size() > 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Los siguientes correos no cumplen con el formato : " + errorEmail.toString());
         }

@@ -31,9 +31,7 @@ public class Estudiante extends Usuario {
     @Nullable
     private Date fecha_nacimiento;
 
-    @ManyToMany(
-        fetch = FetchType.EAGER
-    )
+    @ManyToMany
     @JoinTable(
         name = "matricula",
         joinColumns = @JoinColumn(name = "estudiante_id"),
@@ -51,7 +49,12 @@ public class Estudiante extends Usuario {
         this.genero = genero;
         this.fecha_nacimiento = fechaNac;
     }
-
+    
+    @Override
+    public String toString() {
+        return this.getEmail();
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -6,6 +6,8 @@ import com.example.chaea.entities.Estudiante;
 import com.example.chaea.entities.Grupo;
 import com.example.chaea.entities.UsuarioEstado;
 import com.example.chaea.repositories.EstudianteRepository;
+import com.example.chaea.repositories.GrupoRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +30,17 @@ public class EstudianteController {
     @Autowired
     private EstudianteRepository estudianteRepository;
     
+    @Autowired
+    private GrupoRepository grupoRepository;
+    
     // Expresión regular para validar correos electrónicos
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@ufps.edu.co$");
+    
+    @GetMapping("/omero")
+    @PreAuthorize("hasRole('ESTUDIANTE')")
+    public String ola() {
+        return "Hola";
+    }
     
     /*
      * No puedo crear estudiantes siendo profesor
@@ -61,11 +72,13 @@ public class EstudianteController {
     }
     */
     @GetMapping
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<List<Estudiante>> listarEstudiantes() {
         return ResponseEntity.ok(estudianteRepository.findAll());
     }
-    
+
     @GetMapping("/{email}")
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> consultarPorCorreo(@PathVariable String email) {
         // Validar formato de correo electrónico
         if (!EMAIL_PATTERN.matcher(email).matches()) {
@@ -137,24 +150,5 @@ public class EstudianteController {
         return ResponseEntity.ok(estudianteRepository.save(estudianteExistente));
     }
     
-    @GetMapping("/{email}/grupos")
-    @PreAuthorize("hasRole('ESTUDIANTE') or hasRole('ESTUDIANTE_INCOMPLETO')")
-    public ResponseEntity<?> consultarGruposPorCorreo(@PathVariable String email) {
-        // Validar formato de correo electrónico
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Formato de correo incorrecto: " + email);
-        }
-        
-        Optional<Estudiante> estudianteOptional = estudianteRepository.findById(email);
-        if (!estudianteOptional.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Estudiante no encontrado con el correo: " + email);
-        }
-        
-        Set<Grupo> grupos = estudianteOptional.get().getGrupos();
-        List<GrupoResumidoDTO> gruposResumidos = grupos.stream().map(grupo -> new GrupoResumidoDTO(grupo.getId(),
-                grupo.getNombre(), grupo.getProfesor().getNombre(), grupo.getProfesor().getEmail()))
-                .collect(Collectors.toList());
-        
-        return ResponseEntity.ok(gruposResumidos);
-    }
+    
 }

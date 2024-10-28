@@ -73,11 +73,13 @@ public class ProfesorController {
      */
     
     @GetMapping
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<List<Profesor>> listarProfesores() {
         return ResponseEntity.ok(profesorRepository.findAll());
     }
     
     @GetMapping("/{email}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> consultarPorCorreo(@PathVariable String email) {
         // Validar formato de correo electrónico
         if (!EMAIL_PATTERN.matcher(email).matches()) {
@@ -90,7 +92,7 @@ public class ProfesorController {
         return ResponseEntity.ok(profesorOptional.get());
     }
     
-    @PutMapping("/deactivate/{email}")
+    @DeleteMapping("/deactivate/{email}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> eliminarProfesor(@PathVariable String email) {
         // Validar formato de correo electrónico
