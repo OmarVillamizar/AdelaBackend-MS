@@ -18,7 +18,8 @@ public class CategoriaService {
     private CuestionarioRepository cuestionarioRepository;
     
     public Categoria crearCategoria(Long idCuestionario, String nombre, Double valorMinimo, Double valorMaximo) {
-        Cuestionario cuestionario = cuestionarioRepository.findById(idCuestionario).orElseThrow(()->new RuntimeException("Cuestionario no encontrado con id "+idCuestionario));
+        Cuestionario cuestionario = cuestionarioRepository.findById(idCuestionario)
+                .orElseThrow(() -> new RuntimeException("Cuestionario no encontrado con id " + idCuestionario));
         
         Categoria categoria = new Categoria();
         
