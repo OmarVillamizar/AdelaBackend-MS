@@ -100,7 +100,7 @@ public class GrupoController {
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> consultarGrupoPorId(@PathVariable int id) {
         Profesor profesor = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<Grupo> grupoOpt = grupoRepository.findByProfesorAndById(profesor, id);
+        Optional<Grupo> grupoOpt = grupoRepository.findByProfesorAndId(profesor, id);
         if (!grupoOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Grupo no encontrado con el ID: " + id);
         }
@@ -111,7 +111,7 @@ public class GrupoController {
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> eliminarGrupo(@PathVariable int id) {
         Profesor profesor = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<Grupo> grupoOpt = grupoRepository.findByProfesorAndById(profesor, id);
+        Optional<Grupo> grupoOpt = grupoRepository.findByProfesorAndId(profesor, id);
         if (!grupoOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Grupo no encontrado con el ID: " + id);
         }
@@ -130,7 +130,7 @@ public class GrupoController {
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> actualizarGrupo(@PathVariable int id, @RequestBody GrupoDTO grupoDTO) {
         Profesor profesor = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<Grupo> grupoOptional = grupoRepository.findByProfesorAndById(profesor, id);
+        Optional<Grupo> grupoOptional = grupoRepository.findByProfesorAndId(profesor, id);
         if (!grupoOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Grupo no encontrado con el ID: " + id);
         }
@@ -188,7 +188,7 @@ public class GrupoController {
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> agregarEstudiantesAlGrupo(@PathVariable int id, @RequestBody List<String> emails) {
         Profesor profesor = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<Grupo> grupoOptional = grupoRepository.findByProfesorAndById(profesor, id);
+        Optional<Grupo> grupoOptional = grupoRepository.findByProfesorAndId(profesor, id);
         if (!grupoOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Grupo no encontrado con el ID: " + id);
         }
@@ -231,7 +231,7 @@ public class GrupoController {
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> eliminarEstudianteDelGrupo(@PathVariable int id, @PathVariable String email) {
         Profesor profesor = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<Grupo> grupoOptional = grupoRepository.findByProfesorAndById(profesor, id);
+        Optional<Grupo> grupoOptional = grupoRepository.findByProfesorAndId(profesor, id);
         if (!grupoOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Grupo no encontrado con el ID: " + id);
         }
@@ -255,7 +255,7 @@ public class GrupoController {
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> eliminarEstudiantesDelGrupo(@PathVariable int id, @RequestBody List<String> emails) {
         Profesor profesor = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<Grupo> grupoOptional = grupoRepository.findByProfesorAndById(profesor, id);
+        Optional<Grupo> grupoOptional = grupoRepository.findByProfesorAndId(profesor, id);
         if (!grupoOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Grupo no encontrado con el ID: " + id);
         }

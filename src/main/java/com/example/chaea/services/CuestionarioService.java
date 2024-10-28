@@ -12,11 +12,14 @@ public class CuestionarioService {
     @Autowired
     private CuestionarioRepository cuestionarioRepository;
 
-    public Cuestionario crearCuestionario(String titulo) {
+    public Cuestionario crearCuestionario(String nombre, String descripcion, String autor, String version, String siglas) {
         Cuestionario cuestionario = new Cuestionario();
-        cuestionario.setTitulo(titulo);
+        cuestionario.setNombre(nombre);
+        cuestionario.setDescripcion(descripcion);
+        cuestionario.setAutor(autor);
+        cuestionario.setVersion(version);
+        cuestionario.setSiglas(siglas);
 
         return cuestionarioRepository.save(cuestionario);
     }
 }
-

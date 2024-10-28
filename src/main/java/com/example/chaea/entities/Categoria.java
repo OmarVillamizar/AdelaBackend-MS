@@ -1,36 +1,35 @@
 package com.example.chaea.entities;
 
-import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 public class Categoria {
-    @EmbeddedId
-    private CategoriaId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     
     @ManyToOne
-    @MapsId("cuestionarioId")
-    @JoinColumn(name = "cuestionario_id")
+    @JoinColumn(name = "cuestionario_id", referencedColumnName = "id", nullable = false)
     private Cuestionario cuestionario;
-
-    public CategoriaId getId() {
-        return id;
-    }
-
-    public void setId(CategoriaId id) {
-        this.id = id;
-    }
-
-    public Cuestionario getCuestionario() {
-        return cuestionario;
-    }
-
-    public void setCuestionario(Cuestionario cuestionario) {
-        this.cuestionario = cuestionario;
-    }
     
+    @Column(nullable = false)
+    private String nombre;
     
+    @Column(nullable = false)
+    private Double valorMinimo;
+    
+    @Column(nullable = false)
+    private Double valorMaximo;
 }

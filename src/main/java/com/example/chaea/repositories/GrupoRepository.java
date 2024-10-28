@@ -12,5 +12,5 @@ import com.example.chaea.entities.Profesor;
 public interface GrupoRepository extends JpaRepository<Grupo, Integer> {
     List<Grupo> findByNombre(String nombre);
     List<Grupo> findByProfesor(Profesor profesor);
-    Optional<Grupo> findByProfesorAndById(Profesor profesor, int id);
+    Optional<Grupo> findByProfesorAndId(Profesor profesor, int id);
 }

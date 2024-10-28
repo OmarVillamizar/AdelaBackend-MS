@@ -1,51 +1,39 @@
 package com.example.chaea.entities;
 
-import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 public class Opcion {
-
-    @EmbeddedId
-    private OpcionId id;
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
     @ManyToOne
-    @MapsId("preguntaId")
-    @JoinColumns({
-        @JoinColumn(name = "cuestionario_id", referencedColumnName = "cuestionarioId"),
-        @JoinColumn(name = "pregunta_id", referencedColumnName = "preguntaId")
-    })
+    @JoinColumn(name = "pregunta_id", referencedColumnName = "id", nullable = false)
     private Pregunta pregunta;
-
-    private String texto;
-
-    // Getters y setters
-    public OpcionId getId() {
-        return id;
-    }
-
-    public void setId(OpcionId id) {
-        this.id = id;
-    }
-
-    public Pregunta getPregunta() {
-        return pregunta;
-    }
-
-    public void setPregunta(Pregunta pregunta) {
-        this.pregunta = pregunta;
-    }
-
-    public String getTexto() {
-        return texto;
-    }
-
-    public void setTexto(String texto) {
-        this.texto = texto;
-    }
+    
+    @ManyToOne
+    @JoinColumn(name = "categoria_id", referencedColumnName = "id", nullable = false)
+    private Categoria categoria;
+    
+    @Column(nullable = false)
+    private String respuesta;
+    
+    @Column(nullable = false)
+    private Double valor;
+    
+    @Column(nullable = false)
+    private int orden;
 }
-
