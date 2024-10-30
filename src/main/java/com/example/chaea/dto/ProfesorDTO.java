@@ -19,7 +19,7 @@ public class ProfesorDTO extends UserDTO {
     private ProfesorEstado estadoProfesor;
     public ProfesorDTO(String email, String nombre, String codigo, UsuarioEstado estado, String carrera, Rol rol, ProfesorEstado profesorEstado) {
         super(email, nombre, codigo, estado, UserType.PROFESOR);
-        this.carrera = carrera;
+        this.carrera = carrera == null ? "" : carrera;
         this.rol = rol == null ? "INACTIVO" : rol.getDescripcion();
         this.estadoProfesor = profesorEstado;
     }

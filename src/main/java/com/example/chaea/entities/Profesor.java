@@ -1,5 +1,6 @@
 package com.example.chaea.entities;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -20,16 +21,18 @@ import lombok.Setter;
 @Table(name = "profesor")
 public class Profesor extends Usuario{
 	
-	@Column(length = 50,nullable = true)
+	@Column(length = 50)
 	@Getter
 	@Setter
+	@Nullable
 	private String carrera;
 	
 	@ManyToOne
-	@JoinColumn(name = "rol_id",nullable = true)
+	@JoinColumn(name = "rol_id")
+	@Nullable
 	private Rol rol;
 	
-	@Column(length = 100,nullable = true)
+	@Column(length = 100)
 	@Getter
 	@Setter
 	@Enumerated(EnumType.STRING)

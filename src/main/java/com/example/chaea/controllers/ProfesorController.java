@@ -175,7 +175,7 @@ public class ProfesorController {
     }
     
     @PutMapping
-    @PreAuthorize("hasRole('PROFESOR') or hasRole('PROFESOR_INACTIVO') or hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('PROFESOR_INCOMPLETO') or hasRole('PROFESOR_INACTIVO') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> actualizarProfesor(@RequestBody ProfesorDTO profesorDTO) {
         // Validar formato de correo electrónico
         Profesor prof = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

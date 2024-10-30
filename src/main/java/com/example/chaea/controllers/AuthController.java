@@ -92,6 +92,7 @@ public class AuthController {
             newUsuario.setEstado(UsuarioEstado.INCOMPLETA);
             newUsuario.setEstadoProfesor(ProfesorEstado.INACTIVA);
             newUsuario.setNombre(authentication.getPrincipal().getAttribute("name"));
+            newUsuario.setRol(null);
             usuarioRepository.save(newUsuario);
             usuario = newUsuario;
         } else {

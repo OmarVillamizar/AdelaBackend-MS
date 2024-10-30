@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public abstract class UserDTO {
     private String email;
@@ -21,5 +20,13 @@ public abstract class UserDTO {
     private UsuarioEstado estado;
     
     private UserType tipoUsuario;
+
+    public UserDTO(String email, String nombre, String codigo, UsuarioEstado estado, UserType tipoUsuario) {
+        this.email = email;
+        this.nombre = nombre;
+        this.codigo = codigo == null ? "" : codigo;
+        this.estado = estado;
+        this.tipoUsuario = tipoUsuario;
+    }
     
 }

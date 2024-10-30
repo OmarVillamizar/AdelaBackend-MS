@@ -1,5 +1,6 @@
 package com.example.chaea.entities;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -18,13 +19,16 @@ import lombok.Data;
 public abstract class Usuario {
     
     @Id
-    @Column(length = 100, nullable = false)
+    @Column(length = 100)
+    @Nullable
     private String email;
     
-    @Column(length = 100, nullable = false)
+    @Column(length = 100)
+    @Nullable
     private String nombre;
     
-    @Column(length = 8, nullable = true)
+    @Column(length = 8)
+    @Nullable
     private String codigo;
     
     @Enumerated(EnumType.STRING)

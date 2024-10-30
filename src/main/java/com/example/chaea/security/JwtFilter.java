@@ -68,6 +68,9 @@ public class JwtFilter extends OncePerRequestFilter {
                         if (profe.getEstado() == UsuarioEstado.INCOMPLETA) {
                             permisos.add(new SimpleGrantedAuthority("ROLE_PROFESOR_INCOMPLETO"));
                         }
+                        if (profe.getEstadoProfesor() == ProfesorEstado.INACTIVA) {
+                            permisos.add(new SimpleGrantedAuthority("ROLE_PROFESOR_INACTIVO"));
+                        }
                         authenticationToken = new UsernamePasswordAuthenticationToken(userDetails.get(), null,
                                 permisos);
                     } else if (user instanceof Estudiante) {
@@ -83,6 +86,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     } else {
                         throw new RuntimeException("El usuario no está relacionado a ninguna cuenta");
                     }
+                    //System.out.println(authenticationToken);
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                     
