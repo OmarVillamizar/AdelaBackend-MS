@@ -27,7 +27,7 @@ public abstract class Usuario {
     @Nullable
     private String nombre;
     
-    @Column(length = 8)
+    @Column(length = 8, unique = true)
     @Nullable
     private String codigo;
     

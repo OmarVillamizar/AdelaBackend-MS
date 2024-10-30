@@ -25,9 +25,11 @@ import com.example.chaea.entities.Estudiante;
 import com.example.chaea.entities.Profesor;
 import com.example.chaea.entities.ProfesorEstado;
 import com.example.chaea.entities.Rol;
+import com.example.chaea.entities.Usuario;
 import com.example.chaea.entities.UsuarioEstado;
 import com.example.chaea.repositories.ProfesorRepository;
 import com.example.chaea.repositories.RolRepository;
+import com.example.chaea.repositories.UsuarioRepository;
 
 @RestController
 @RequestMapping("/api/profesores")
@@ -35,6 +37,9 @@ public class ProfesorController {
     
     @Autowired
     private ProfesorRepository profesorRepository;
+    
+    @Autowired
+    private UsuarioRepository usuarioRepository;
     
     @Autowired
     private RolRepository rolRepository;
@@ -199,7 +204,11 @@ public class ProfesorController {
         }
         Optional<Profesor> profesorOptional = profesorRepository.findById(email);
         if (!profesorOptional.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profesor no encontrado con el correo: " + email);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profesor : " + email);
+        }
+        Optional<Usuario> existente = usuarioRepository.findByCodigo(profesorDTO.getCodigo());
+        if(existente.isPresent() && !existente.get().getEmail().equals(email)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ya hay una usuario registrado con el codigo: " + profesorDTO.getCodigo());
         }
         
         Profesor profesorExistente = profesorOptional.get();
