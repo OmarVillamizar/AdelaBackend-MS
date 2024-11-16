@@ -1,5 +1,7 @@
 package com.example.chaea.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,10 +24,12 @@ public class Opcion {
     
     @ManyToOne
     @JoinColumn(name = "pregunta_id", referencedColumnName = "id", nullable = false)
+    @JsonBackReference
     private Pregunta pregunta;
     
     @ManyToOne
     @JoinColumn(name = "categoria_id", referencedColumnName = "id", nullable = false)
+    @JsonBackReference
     private Categoria categoria;
     
     @Column(nullable = false)

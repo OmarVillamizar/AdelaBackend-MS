@@ -3,6 +3,10 @@ package com.example.chaea.entities;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,6 +17,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
@@ -26,6 +31,7 @@ public class Pregunta {
     
     @ManyToOne
     @JoinColumn(name = "cuestionario_id", referencedColumnName = "id", nullable = false)
+    @JsonBackReference
     private Cuestionario cuestionario;
     
     @Column(nullable = false)
@@ -34,6 +40,8 @@ public class Pregunta {
     @Column(nullable = false)
     private int orden;
     
-    @OneToMany(mappedBy = "pregunta")
+    @OneToMany(mappedBy = "pregunta", cascade = CascadeType.ALL)
+    @EqualsAndHashCode.Exclude
+    @JsonManagedReference
     private Set<Opcion> opciones = new HashSet<>();
 }

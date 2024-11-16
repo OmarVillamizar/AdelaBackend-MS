@@ -3,10 +3,13 @@ package com.example.chaea.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.chaea.dto.CategoriaDTO;
 import com.example.chaea.entities.Categoria;
 import com.example.chaea.entities.Cuestionario;
 import com.example.chaea.repositories.CategoriaRepository;
 import com.example.chaea.repositories.CuestionarioRepository;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class CategoriaService {
@@ -19,7 +22,7 @@ public class CategoriaService {
     
     public Categoria crearCategoria(Long idCuestionario, String nombre, Double valorMinimo, Double valorMaximo) {
         Cuestionario cuestionario = cuestionarioRepository.findById(idCuestionario)
-                .orElseThrow(() -> new RuntimeException("Cuestionario no encontrado con id " + idCuestionario));
+                .orElseThrow(() -> new EntityNotFoundException("Cuestionario no encontrado con id " + idCuestionario));
         
         Categoria categoria = new Categoria();
         
@@ -27,6 +30,18 @@ public class CategoriaService {
         categoria.setNombre(nombre);
         categoria.setValorMaximo(valorMaximo);
         categoria.setValorMinimo(valorMinimo);
+        
+        return categoriaRepository.save(categoria);
+    }
+    
+    public Categoria crearCategoria(Cuestionario cuestionario, CategoriaDTO categoriaDTO) {
+        
+        Categoria categoria = new Categoria();
+                
+        categoria.setCuestionario(cuestionario);
+        categoria.setNombre(categoriaDTO.getNombre());
+        categoria.setValorMaximo(categoriaDTO.getValorMaximo());
+        categoria.setValorMinimo(categoriaDTO.getValorMinimo());
         
         return categoriaRepository.save(categoria);
     }
