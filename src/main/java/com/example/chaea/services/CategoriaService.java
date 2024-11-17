@@ -38,14 +38,18 @@ public class CategoriaService {
         categoriaRepository.delete(categoria);
     }
     
+    public void guardarCategorias(Iterable<Categoria> categorias) {
+        categoriaRepository.saveAll(categorias);
+    }
+    
     public Categoria crearCategoria(Cuestionario cuestionario, CategoriaDTO categoriaDTO) {
         
         Categoria categoria = new Categoria();
                 
         categoria.setCuestionario(cuestionario);
         categoria.setNombre(categoriaDTO.getNombre());
-        categoria.setValorMaximo(categoriaDTO.getValorMaximo());
-        categoria.setValorMinimo(categoriaDTO.getValorMinimo());
+        categoria.setValorMaximo(0d);
+        categoria.setValorMinimo(0d);
         
         return categoriaRepository.save(categoria);
     }

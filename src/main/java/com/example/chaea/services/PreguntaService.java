@@ -67,6 +67,9 @@ public class PreguntaService {
             }
             Opcion opcion = opcionService.crearOpcion(pregunta, categoria, opcionDTO);
             opciones.add(opcion);
+            
+            categoria.setValorMaximo(categoria.getValorMaximo()+opcion.getValor());
+            categoria.setValorMinimo(Math.min(categoria.getValorMinimo(), opcion.getValor()));
         }
         
         pregunta.setOpciones(opciones);

@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.chaea.dto.CategoriaDTO;
 import com.example.chaea.dto.CuestionarioDTO;
@@ -45,6 +46,7 @@ public class CuestionarioService {
         return cuestionarioRepository.save(cuestionario);
     }
     
+    @Transactional
     public Cuestionario crearCuestionario(CuestionarioDTO cuestionarioDTO) {
         Cuestionario cuestionarioSave = new Cuestionario();
         cuestionarioSave.setNombre(cuestionarioDTO.getNombre());
@@ -71,6 +73,8 @@ public class CuestionarioService {
             Pregunta pregunta = preguntaService.crearPregunta(cuestionario, idMap, preguntaDTO);
             preguntas.add(pregunta);
         }
+        
+        categoriaService.guardarCategorias(categorias);
         
         cuestionario.setCategorias(categorias);
         cuestionario.setPreguntas(preguntas);

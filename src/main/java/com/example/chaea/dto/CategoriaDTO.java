@@ -8,6 +8,4 @@ import lombok.NoArgsConstructor;
 public class CategoriaDTO {
     private String nombre;
     private int id; //No es el id de la bd
-    private Double valorMinimo;
-    private Double valorMaximo;
 }
