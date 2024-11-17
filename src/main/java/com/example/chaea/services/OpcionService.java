@@ -50,6 +50,11 @@ public class OpcionService {
                 + pregunta.getCuestionario().getId() + ") y categoria(" + categoria.getCuestionario().getId() + ")");
     }
     
+    public void eliminarOpcion(Opcion opcion) {
+        opcionRepository.save(opcion);
+        opcionRepository.delete(opcion);
+    }
+    
     public Opcion crearOpcion(Pregunta pregunta, Categoria categoria, OpcionDTO opcionDTO) {
         if (pregunta.getCuestionario().getId().equals(categoria.getCuestionario().getId())) {
             Opcion opcion = new Opcion();

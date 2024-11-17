@@ -34,6 +34,10 @@ public class CategoriaService {
         return categoriaRepository.save(categoria);
     }
     
+    public void eliminarCategoria(Categoria categoria) {
+        categoriaRepository.delete(categoria);
+    }
+    
     public Categoria crearCategoria(Cuestionario cuestionario, CategoriaDTO categoriaDTO) {
         
         Categoria categoria = new Categoria();

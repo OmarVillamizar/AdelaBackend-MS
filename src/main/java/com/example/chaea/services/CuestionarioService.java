@@ -82,6 +82,16 @@ public class CuestionarioService {
         Cuestionario cuestionario = cuestionarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Cuestionario no encontrado con el ID: " + id));
         
+        for(Pregunta pregunta : cuestionario.getPreguntas()) {
+            preguntaService.eliminarPregunta(pregunta);
+        }
+        cuestionario.getPreguntas().clear();
+        
+        for(Categoria categoria : cuestionario.getCategorias()) {
+            categoriaService.eliminarCategoria(categoria);
+        }
+        cuestionario.getPreguntas().clear();
+        
         cuestionarioRepository.delete(cuestionario);
     }
     

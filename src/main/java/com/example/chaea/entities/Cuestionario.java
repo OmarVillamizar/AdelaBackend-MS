@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @AllArgsConstructor
@@ -41,13 +42,15 @@ public class Cuestionario {
     @Column(nullable = false)
     private String siglas;
     
-    @OneToMany(mappedBy = "cuestionario", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "cuestionario", cascade = CascadeType.ALL, orphanRemoval = true)
     @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @JsonManagedReference
     private Set<Pregunta> preguntas = new HashSet<>();
 
-    @OneToMany(mappedBy = "cuestionario", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "cuestionario", cascade = CascadeType.ALL, orphanRemoval = true)
     @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @JsonManagedReference
     private Set<Categoria> categorias = new HashSet<>();
 }

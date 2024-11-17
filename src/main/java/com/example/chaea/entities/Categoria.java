@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @AllArgsConstructor
@@ -27,6 +28,7 @@ public class Categoria {
     @ManyToOne
     @JoinColumn(name = "cuestionario_id", referencedColumnName = "id", nullable = false)
     @JsonBackReference
+    @ToString.Exclude
     private Cuestionario cuestionario;
     
     @Column(nullable = false)

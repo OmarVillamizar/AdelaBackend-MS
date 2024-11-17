@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @AllArgsConstructor
@@ -32,6 +33,7 @@ public class Pregunta {
     @ManyToOne
     @JoinColumn(name = "cuestionario_id", referencedColumnName = "id", nullable = false)
     @JsonBackReference
+    @ToString.Exclude
     private Cuestionario cuestionario;
     
     @Column(nullable = false)
@@ -40,8 +42,9 @@ public class Pregunta {
     @Column(nullable = false)
     private int orden;
     
-    @OneToMany(mappedBy = "pregunta", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "pregunta", cascade = CascadeType.ALL, orphanRemoval = true)
     @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     @JsonManagedReference
     private Set<Opcion> opciones = new HashSet<>();
 }

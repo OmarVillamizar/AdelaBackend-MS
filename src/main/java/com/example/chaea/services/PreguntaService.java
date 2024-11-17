@@ -41,6 +41,14 @@ public class PreguntaService {
         return preguntaRepository.save(pregunta);
     }
     
+    public void eliminarPregunta(Pregunta pregunta) {
+        for(Opcion opcion : pregunta.getOpciones()) {
+            opcionService.eliminarOpcion(opcion);
+        }
+        pregunta.getOpciones().clear();
+        preguntaRepository.delete(pregunta);
+    }
+    
     public Pregunta crearPregunta(Cuestionario cuestionario, Map<Integer, Categoria> mapId, PreguntaDTO preguntaDTO) {
         Pregunta preguntaSave = new Pregunta();
         preguntaSave.setCuestionario(cuestionario);
