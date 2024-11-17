@@ -2,6 +2,7 @@ package com.example.chaea.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,8 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.chaea.dto.CuestionarioDTO;
+import com.example.chaea.dto.RequestEstudianteEmail;
 import com.example.chaea.entities.Cuestionario;
 import com.example.chaea.services.CuestionarioService;
+import com.example.chaea.services.ResultadoCuestionarioService;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -24,6 +27,9 @@ public class CuestionarioController {
     
     @Autowired
     private CuestionarioService cuestionarioService;
+    
+    @Autowired
+    private ResultadoCuestionarioService resultadoCuestionarioService;
     
     @PostMapping
     @PreAuthorize("hasRole('ADMINISTRADOR')")
@@ -65,6 +71,28 @@ public class CuestionarioController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+    
+    @PostMapping("/{idCuestionario}/asignargrupo/{idGrupo}")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('PROFESOR')")
+    public ResponseEntity<?> asignarCuestionarioAGrupo(@PathVariable Long idCuestionario, @PathVariable int idGrupo){
+        try {
+            resultadoCuestionarioService.asignarCuestionarioAGrupo(idCuestionario, idGrupo);
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        }catch(EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+    
+    @PostMapping("/{idCuestionario}/asignarestudiante")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('PROFESOR')")
+    public ResponseEntity<?> asignarCuestionarioAEstudiante(@PathVariable Long idCuestionario, @RequestBody RequestEstudianteEmail estudianteEmail){
+        try {
+            resultadoCuestionarioService.asignarCuestionarioAEstudiante(idCuestionario, estudianteEmail.getEmail());
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        }catch(EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 }
