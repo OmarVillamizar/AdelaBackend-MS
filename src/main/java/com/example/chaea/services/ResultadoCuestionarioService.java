@@ -7,13 +7,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.chaea.dto.CategoriaResultadoDTO;
+import com.example.chaea.dto.CuestionarioResumidoDTO;
+import com.example.chaea.dto.ListasCuestionariosDTO;
+import com.example.chaea.dto.PreguntaResueltaDTO;
 import com.example.chaea.dto.RespuestaCuestionarioDTO;
+import com.example.chaea.dto.ResultCuestCompletoDTO;
+import com.example.chaea.dto.ResultadoCuestionarioDTO;
+import com.example.chaea.entities.Categoria;
 import com.example.chaea.entities.Cuestionario;
 import com.example.chaea.entities.Estudiante;
 import com.example.chaea.entities.Grupo;
@@ -148,13 +154,96 @@ public class ResultadoCuestionarioService {
                 .orElseThrow(() -> new EntityNotFoundException("No existe el estudiante con id " + estudianteEmail));
         if (resultadoCuestionarioRepository
                 .findByCuestionarioAndEstudianteAndFechaResolucionIsNull(cuestionario, estudiante).isEmpty()) {
-            System.out.println("Hereee");
             ResultadoCuestionario rc = new ResultadoCuestionario();
             rc.setCuestionario(cuestionario);
             rc.setEstudiante(estudiante);
             rc.setFechaAplicacion(Date.valueOf(LocalDate.now()));
             resultadoCuestionarioRepository.save(rc);
         }
+    }
+    
+    public ListasCuestionariosDTO obtenerCuestionarios(Estudiante estudiante) {
+        List<ResultadoCuestionario> info = resultadoCuestionarioRepository.findByEstudiante(estudiante);
+        
+        List<ResultadoCuestionarioDTO> pendientes = new LinkedList<>();
+        List<ResultadoCuestionarioDTO> resueltos = new LinkedList<>();
+        
+        for (ResultadoCuestionario rc : info) {
+            ResultadoCuestionarioDTO rcdto = new ResultadoCuestionarioDTO();
+            
+            Cuestionario c = rc.getCuestionario();
+            
+            CuestionarioResumidoDTO cdto = CuestionarioResumidoDTO.from(c);
+            
+            rcdto.setCuestionario(cdto);
+            rcdto.setEstudiante(rc.getEstudiante());
+            rcdto.setFechaAplicacion(rc.getFechaAplicacion());
+            rcdto.setFechaResolucion(rc.getFechaResolucion());
+            rcdto.setId(rc.getId());
+            if (rc.getFechaResolucion() == null) {
+                pendientes.add(rcdto);
+            } else {
+                resueltos.add(rcdto);
+            }
+        }
+        
+        ListasCuestionariosDTO lcdto = new ListasCuestionariosDTO();
+        
+        lcdto.setPendientes(pendientes);
+        lcdto.setResueltos(resueltos);
+        
+        return lcdto;
+    }
+    
+    public ResultCuestCompletoDTO obtenerResultadoCuestionario(Long cuestionarioResueltoId, Estudiante estudiante) {
+        ResultCuestCompletoDTO res = new ResultCuestCompletoDTO();
+        
+        ResultadoCuestionario resC = resultadoCuestionarioRepository.findById(cuestionarioResueltoId)
+                .orElseThrow(() -> new EntityNotFoundException("Al estudiante " + estudiante.getEmail()
+                        + " el resultado de id " + cuestionarioResueltoId + " no pertenece al estudiante o no existe"));
+        
+        if (resC.getFechaResolucion() == null) {
+            throw new EntityNotFoundException("El id " + cuestionarioResueltoId
+                    + " corresponde a una aplicación de un cuestionario que no se ha completado");
+        }
+        
+        Cuestionario c = resC.getCuestionario();
+        res.setCuestionario(CuestionarioResumidoDTO.from(c));
+        res.setEstudiante(resC.getEstudiante());
+        res.setFechaAplicacion(resC.getFechaAplicacion());
+        res.setFechaResolucion(resC.getFechaResolucion());
+        res.setId(resC.getId());
+        
+        Map<Long, CategoriaResultadoDTO> mp = new TreeMap<>();
+        List<CategoriaResultadoDTO> categorias = new LinkedList<>();
+        List<PreguntaResueltaDTO> preguntas = new LinkedList<>();
+        
+        for (Categoria categoria : c.getCategorias()) {
+            CategoriaResultadoDTO cr = new CategoriaResultadoDTO();
+            cr.setNombre(categoria.getNombre());
+            cr.setValor(0d);
+            cr.setValorMaximo(categoria.getValorMaximo());
+            cr.setValorMinimo(categoria.getValorMinimo());
+            mp.put(categoria.getId(), cr);
+            categorias.add(cr);
+        }
+        
+        for (ResultadoPregunta rep : resC.getPreguntas()) {
+            PreguntaResueltaDTO pr = new PreguntaResueltaDTO();
+            Opcion o = rep.getOpcion();
+            Pregunta p = o.getPregunta();
+            pr.setPregunta(p.getPregunta());
+            pr.setRespuesta(o.getRespuesta());
+            pr.setOrden(p.getOrden());
+            CategoriaResultadoDTO cr = mp.get(o.getCategoria().getId());
+            cr.setValor(cr.getValor() + o.getValor());
+            preguntas.add(pr);
+        }
+        
+        res.setCategorias(categorias);
+        res.setPreguntas(preguntas);
+        
+        return res;
     }
     
 }

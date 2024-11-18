@@ -30,7 +30,7 @@ public class Cuestionario {
     @Column(nullable = false)
     private String nombre;
     
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1000)
     private String descripcion;
     
     @Column(nullable = false)

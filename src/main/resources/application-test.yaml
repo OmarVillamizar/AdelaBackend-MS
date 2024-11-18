@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    # Usamos H2 en disco, se guarda mientras se ejecuta la app y se elimina al terminar
+    url: jdbc:h2:file:/tmp/testdb;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop  # Se crea y elimina la base de datos al iniciar y finalizar la aplicación
