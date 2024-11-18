@@ -12,4 +12,5 @@ public class CuestionarioResumidoDTO {
     private String descripcion;
     private String autor;
     private String version;
+    private int numPreguntas;
 }
