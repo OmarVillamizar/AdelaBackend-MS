@@ -85,9 +85,9 @@ public class ResultadoCuestionarioService {
             Long preguntaId = rp.getOpcion().getPregunta().getId();
             if (answered.containsKey(preguntaId)) {
                 throw new RuntimeException(
-                        "La pregunta " + answered.get(preguntaId).getOrden() + " tuvo mas de una opcion seleccionada.");
+                        "La pregunta " + answered.get(preguntaId).getOrden() + " tuvo mas de una opcion seleccionada("+rp.getOpcion().getOrden()+").");
             }
-            answered.put(cuestionarioId, null);
+            answered.put(preguntaId, rp.getOpcion().getPregunta());
             unAnswered.remove(preguntaId);
             resultadoPreguntas.add(rp);
         }
