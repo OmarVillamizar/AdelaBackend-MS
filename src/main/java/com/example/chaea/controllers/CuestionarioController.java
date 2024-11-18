@@ -124,4 +124,17 @@ public class CuestionarioController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+    
+    @GetMapping("/mis-cuestionarios/resuelto/{id}")
+    @PreAuthorize("hasRole('ESTUDIANTE')")
+    public ResponseEntity<?> obtenerResultadoCuestionario(@PathVariable Long id){
+        try {
+            Estudiante estudiante = (Estudiante) SecurityContextHolder.getContext().getAuthentication().getPrincipal();;
+            return new ResponseEntity<>(resultadoCuestionarioService.obtenerResultadoCuestionario(id, estudiante) ,HttpStatus.OK);
+        }catch(EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }catch(Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
 }
