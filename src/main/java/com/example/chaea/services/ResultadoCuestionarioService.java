@@ -179,7 +179,7 @@ public class ResultadoCuestionarioService {
             rcdto.setCuestionario(cdto);
             rcdto.setEstudiante(rc.getEstudiante());
             rcdto.setFechaAplicacion(rc.getFechaAplicacion());
-            rcdto.setFechaResolucion(rcdto.getFechaResolucion());
+            rcdto.setFechaResolucion(rc.getFechaResolucion());
             rcdto.setId(rc.getId());
             if (rc.getFechaResolucion() == null) {
                 pendientes.add(rcdto);
