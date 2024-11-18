@@ -14,4 +14,6 @@ public interface ResultadoCuestionarioRepository extends JpaRepository<Resultado
     Optional<ResultadoCuestionario> findByCuestionarioAndEstudianteAndFechaResolucionIsNull(Cuestionario cuestionario, Estudiante estudiante); 
     // Método para encontrar una lista de ResultadoCuestionario por Estudiante y fechaResolucion null 
     List<ResultadoCuestionario> findByEstudianteAndFechaResolucionIsNull(Estudiante estudiante);
+    
+    List<ResultadoCuestionario> findByEstudiante(Estudiante estudiante);
 }

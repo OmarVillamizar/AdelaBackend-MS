@@ -7,13 +7,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.chaea.dto.CuestionarioResumidoDTO;
+import com.example.chaea.dto.ListasCuestionariosDTO;
 import com.example.chaea.dto.RespuestaCuestionarioDTO;
+import com.example.chaea.dto.ResultadoCuestionarioDTO;
 import com.example.chaea.entities.Cuestionario;
 import com.example.chaea.entities.Estudiante;
 import com.example.chaea.entities.Grupo;
@@ -155,6 +157,43 @@ public class ResultadoCuestionarioService {
             rc.setFechaAplicacion(Date.valueOf(LocalDate.now()));
             resultadoCuestionarioRepository.save(rc);
         }
+    }
+    
+    public ListasCuestionariosDTO obtenerCuestionarios(Estudiante estudiante) {
+        List<ResultadoCuestionario> info = resultadoCuestionarioRepository.findByEstudiante(estudiante);
+        
+        List<ResultadoCuestionarioDTO> pendientes = new LinkedList<>();
+        List<ResultadoCuestionarioDTO> resueltos = new LinkedList<>();
+        
+        for (ResultadoCuestionario rc : info) {
+            ResultadoCuestionarioDTO rcdto = new ResultadoCuestionarioDTO();
+            CuestionarioResumidoDTO cdto = new CuestionarioResumidoDTO();
+            Cuestionario c = rc.getCuestionario();
+            cdto.setAutor(c.getAutor());
+            cdto.setDescripcion(c.getDescripcion());
+            cdto.setNombre(c.getNombre());
+            cdto.setId(c.getId());
+            cdto.setNumPreguntas(c.getPreguntas().size());
+            cdto.setSiglas(c.getSiglas());
+            cdto.setVersion(c.getVersion());
+            rcdto.setCuestionario(cdto);
+            rcdto.setEstudiante(rc.getEstudiante());
+            rcdto.setFechaAplicacion(rc.getFechaAplicacion());
+            rcdto.setFechaResolucion(rcdto.getFechaResolucion());
+            rcdto.setId(rc.getId());
+            if (rc.getFechaResolucion() == null) {
+                pendientes.add(rcdto);
+            } else {
+                resueltos.add(rcdto);
+            }
+        }
+        
+        ListasCuestionariosDTO lcdto = new ListasCuestionariosDTO();
+        
+        lcdto.setPendientes(pendientes);
+        lcdto.setResueltos(resueltos);
+        
+        return lcdto;
     }
     
 }
