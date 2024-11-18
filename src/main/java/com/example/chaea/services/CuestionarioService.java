@@ -50,7 +50,7 @@ public class CuestionarioService {
     public Cuestionario crearCuestionario(CuestionarioDTO cuestionarioDTO) {
         Cuestionario cuestionarioSave = new Cuestionario();
         cuestionarioSave.setNombre(cuestionarioDTO.getNombre());
-        cuestionarioSave.setDescripcion(cuestionarioDTO.getAutor());
+        cuestionarioSave.setDescripcion(cuestionarioDTO.getDescripcion());
         cuestionarioSave.setAutor(cuestionarioDTO.getAutor());
         cuestionarioSave.setSiglas(cuestionarioDTO.getSiglas());
         cuestionarioSave.setVersion(cuestionarioDTO.getVersion());
