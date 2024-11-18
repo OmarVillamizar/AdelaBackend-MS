@@ -116,6 +116,7 @@ public class CuestionarioService {
             cdto.setNombre(cuestionario.getNombre());
             cdto.setSiglas(cuestionario.getSiglas());
             cdto.setVersion(cuestionario.getVersion());
+            cdto.setNumPreguntas(cuestionario.getPreguntas().size());
             cdtos.add(cdto);
         }
         
