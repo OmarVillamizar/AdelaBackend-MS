@@ -2,9 +2,9 @@ package com.example.chaea.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.chaea.dto.CuestionarioDTO;
 import com.example.chaea.dto.RequestEstudianteEmail;
+import com.example.chaea.dto.RespuestaCuestionarioDTO;
 import com.example.chaea.entities.Cuestionario;
+import com.example.chaea.entities.Estudiante;
 import com.example.chaea.services.CuestionarioService;
 import com.example.chaea.services.ResultadoCuestionarioService;
 
@@ -93,6 +95,20 @@ public class CuestionarioController {
             return new ResponseEntity<>(HttpStatus.CREATED);
         }catch(EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+    
+    @PostMapping("/responder")
+    @PreAuthorize("hasRole('ESTUDIANTE')")
+    public ResponseEntity<?> responderCuestionario(@RequestBody RespuestaCuestionarioDTO respuesta){
+        try {
+            Estudiante estudiante = (Estudiante) SecurityContextHolder.getContext().getAuthentication().getPrincipal();;
+            resultadoCuestionarioService.responderCuestionario(respuesta, estudiante);
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        }catch(EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }catch(Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 }

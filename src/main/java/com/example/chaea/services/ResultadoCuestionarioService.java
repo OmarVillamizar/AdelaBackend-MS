@@ -4,11 +4,14 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.chaea.dto.RespuestaCuestionarioDTO;
 import com.example.chaea.entities.Cuestionario;
@@ -51,6 +54,7 @@ public class ResultadoCuestionarioService {
     @Autowired
     private EstudianteRepository estudianteRepository;
     
+    @Transactional
     public ResultadoCuestionario responderCuestionario(RespuestaCuestionarioDTO info, Estudiante estudiante) {
         Long cuestionarioId = info.getCuestionarioId();
         Cuestionario cuestionario = cuestionarioRepository.findById(cuestionarioId)
@@ -65,22 +69,33 @@ public class ResultadoCuestionarioService {
         resC = resultadoCuestionarioRepository.save(resC);
         List<ResultadoPregunta> resultadoPreguntas = new LinkedList<>();
         List<Pregunta> preguntas = preguntaRepository.findByCuestionario(cuestionario);
-        Set<Long> noResponse = new TreeSet<>();
+        Map<Long, Pregunta> answered = new TreeMap<>();
+        Map<Long, Pregunta> unAnswered = new TreeMap<>();
         for (Pregunta pregunta : preguntas) {
-            noResponse.add(pregunta.getId());
+            unAnswered.put(pregunta.getId(), pregunta);
         }
         for (Long opcionId : info.getOpcionesSeleccionadasId()) {
             ResultadoPregunta rp = responderPregunta(opcionId, resC);
             Long preguntaId = rp.getOpcion().getPregunta().getId();
-            if (!noResponse.contains(preguntaId)) {
-                throw new RuntimeException("La pregunta " + preguntaId + " tuvo mas de una opcion seleccionada.");
+            if (answered.containsKey(preguntaId)) {
+                throw new RuntimeException(
+                        "La pregunta " + answered.get(preguntaId).getOrden() + " tuvo mas de una opcion seleccionada.");
             }
-            noResponse.remove(preguntaId);
+            answered.put(cuestionarioId, null);
+            unAnswered.remove(preguntaId);
             resultadoPreguntas.add(rp);
         }
         
-        if(!noResponse.isEmpty()) {
-            throw new RuntimeException("Las preguntas con ids "+noResponse.toString()+" no fueron respondidas");
+        if (!unAnswered.isEmpty()) {
+            StringBuilder result = new StringBuilder();
+            for (Pregunta value : unAnswered.values()) {
+                result.append(value.getOrden());
+                result.append(", ");
+            } // Eliminar la última coma y espacio
+            if (result.length() > 0) {
+                result.setLength(result.length() - 2);
+            }
+            throw new RuntimeException("Las preguntas " + result + " no fueron respondidas");
         }
         
         resultadoPreguntaRepository.saveAll(resultadoPreguntas);
@@ -113,8 +128,8 @@ public class ResultadoCuestionarioService {
         Set<Estudiante> estudiantes = grupo.getEstudiantes();
         List<ResultadoCuestionario> asignaciones = new LinkedList<>();
         for (Estudiante estudiante : estudiantes) {
-            if (resultadoCuestionarioRepository.findByCuestionarioAndEstudianteAndFechaResolucionIsNull(cuestionario,
-                    estudiante).isEmpty()) {
+            if (resultadoCuestionarioRepository
+                    .findByCuestionarioAndEstudianteAndFechaResolucionIsNull(cuestionario, estudiante).isEmpty()) {
                 ResultadoCuestionario rc = new ResultadoCuestionario();
                 rc.setCuestionario(cuestionario);
                 rc.setEstudiante(estudiante);
@@ -131,8 +146,8 @@ public class ResultadoCuestionarioService {
         
         Estudiante estudiante = estudianteRepository.findById(estudianteEmail)
                 .orElseThrow(() -> new EntityNotFoundException("No existe el estudiante con id " + estudianteEmail));
-        if (resultadoCuestionarioRepository.findByCuestionarioAndEstudianteAndFechaResolucionIsNull(cuestionario,
-                estudiante).isEmpty()) {
+        if (resultadoCuestionarioRepository
+                .findByCuestionarioAndEstudianteAndFechaResolucionIsNull(cuestionario, estudiante).isEmpty()) {
             System.out.println("Hereee");
             ResultadoCuestionario rc = new ResultadoCuestionario();
             rc.setCuestionario(cuestionario);
@@ -141,4 +156,5 @@ public class ResultadoCuestionarioService {
             resultadoCuestionarioRepository.save(rc);
         }
     }
+    
 }
