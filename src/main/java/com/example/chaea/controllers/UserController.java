@@ -18,7 +18,6 @@ import com.example.chaea.entities.Usuario;
 
 @RestController
 @RequestMapping("/api/user")
-@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
 public class UserController {
     @GetMapping("/info")
     @PreAuthorize("hasRole('ESTUDIANTE') or hasRole('PROFESOR') or hasRole('ESTUDIANTE_INCOMPLETO') or hasRole('PROFESOR_INCOMPLETO') or hasRole('PROFESOR_INACTIVO') or hasRole('ADMINISTRADOR')")
