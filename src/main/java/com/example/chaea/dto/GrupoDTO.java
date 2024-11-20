@@ -13,6 +13,6 @@ public class GrupoDTO {
 	
     private String nombre;
         
-    private Set<String> correosEstudiantes; // Usaremos los correos de los estudiantes
+    private Set<EstudianteCrearDTO> estudiantes; // Usaremos los correos de los estudiantes
     
 }

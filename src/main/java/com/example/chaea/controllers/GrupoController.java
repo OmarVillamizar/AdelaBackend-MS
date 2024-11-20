@@ -1,21 +1,35 @@
 package com.example.chaea.controllers;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Pattern;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.chaea.dto.EstudianteCrearDTO;
 import com.example.chaea.dto.GrupoDTO;
 import com.example.chaea.entities.Estudiante;
 import com.example.chaea.entities.Grupo;
 import com.example.chaea.entities.Profesor;
+import com.example.chaea.entities.UsuarioEstado;
 import com.example.chaea.repositories.EstudianteRepository;
 import com.example.chaea.repositories.GrupoRepository;
 import com.example.chaea.repositories.ProfesorRepository;
-
-import java.util.*;
-import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/grupos")
@@ -36,22 +50,11 @@ public class GrupoController {
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> crearGrupo(@RequestBody GrupoDTO grupoDTO) {
         // Validar campos requeridos
-        if (grupoDTO.getNombre() == null || grupoDTO.getCorreosEstudiantes() == null) {
+    
+        if (grupoDTO.getNombre() == null || grupoDTO.getEstudiantes() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Faltan campos requeridos.");
         }
-        Set<String> errorEmail = new HashSet<>();
-        // Validar formato de correos electrónicos
-        if (grupoDTO.getCorreosEstudiantes() != null) {
-            for (String email : grupoDTO.getCorreosEstudiantes()) {
-                if (!EMAIL_PATTERN.matcher(email).matches()) {
-                    errorEmail.add(email);
-                }
-            }
-        }
-        if (errorEmail.size() > 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Los siguientes correos cuentan con un formato erróneo: " + errorEmail.toString());
-        }
+        
         // Buscar el profesor por su correo electrónico
         Profesor profesor = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         // Crear una nueva instancia de Grupo
@@ -62,23 +65,25 @@ public class GrupoController {
         nuevoGrupo = grupoRepository.save(nuevoGrupo);
         // Crear un conjunto de estudiantes
         Set<Estudiante> estudiantesAsignados = new HashSet<>();
-        Set<String> correosFaltan = new HashSet<String>();
-        if (grupoDTO.getCorreosEstudiantes() != null) {
-            for (String email : grupoDTO.getCorreosEstudiantes()) {
+
+        if (grupoDTO.getEstudiantes() != null) {
+            for (EstudianteCrearDTO estudiante : grupoDTO.getEstudiantes()) {
+                String email = estudiante.getEmail();
+                String nombre = estudiante.getNombre();
                 Optional<Estudiante> estudianteOpt = estudianteRepository.findById(email);
                 if (estudianteOpt.isPresent()) {
-                    Estudiante estudiante = estudianteOpt.get();
-                    estudiantesAsignados.add(estudiante);
+                    Estudiante estud = estudianteOpt.get();
+                    estudiantesAsignados.add(estud);
                 } else {
-                    correosFaltan.add(email);
+                    Estudiante estud = new Estudiante();
+                    estud.setEmail(email);
+                    estud.setNombre(nombre);
+                    estud.setEstado(UsuarioEstado.INCOMPLETA);
+                    estudiantesAsignados.add(estud);
                 }
             }
         }
-        if (correosFaltan.size() > 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    "Los siguientes correos no se encuentran registrados o no pertenecen a cuentas de estudiantes: "
-                            + correosFaltan.toString());
-        }
+        
         for (Estudiante estudiante : estudiantesAsignados) {
             estudiante.getGrupos().add(nuevoGrupo);
         }
@@ -137,24 +142,11 @@ public class GrupoController {
         }
         Grupo grupoExistente = grupoOptional.get();
         grupoExistente.setNombre(grupoDTO.getNombre());
-        Set<String> errorEmail = new HashSet<String>();
-        // Validar formato de correos electrónicos
-        for (String email : grupoDTO.getCorreosEstudiantes()) {
-            if (!EMAIL_PATTERN.matcher(email).matches()) {
-                errorEmail.add(email);
-            }
-        }
-        if (errorEmail.size() > 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Los siguientes correos no cumplen con el formato : " + errorEmail.toString());
-        }
         
         // Actualizar los estudiantes
         Set<Estudiante> estudiantesAdd = new HashSet<>();
-        Set<Estudiante> estudiantesDelete = new HashSet<>();
-        Set<String> noExiste = new HashSet<>();
-        for (String email : grupoDTO.getCorreosEstudiantes()) {
-            Optional<Estudiante> estudianteOpt = estudianteRepository.findById(email);
+        for (EstudianteCrearDTO estud : grupoDTO.getEstudiantes()) {
+            Optional<Estudiante> estudianteOpt = estudianteRepository.findById(estud.getEmail());
             if (estudianteOpt.isPresent()) {
                 Estudiante estudiante = estudianteOpt.get();
                 if (!grupoExistente.getEstudiantes().contains(estudiante)) {
@@ -162,25 +154,16 @@ public class GrupoController {
                     estudiantesAdd.add(estudiante);
                 }
             } else {
-                noExiste.add(email);
-            }
-        }
-        if (noExiste.size() > 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Los siguientes correos no corresponden a cuentas de estudiante o no existen : "
-                            + noExiste.toString());
-        }
-        for (Estudiante e : grupoExistente.getEstudiantes()) {
-            if (!grupoDTO.getCorreosEstudiantes().contains(e.getEmail())) {
-                e.getGrupos().remove(grupoExistente);
-                estudiantesDelete.add(e);
+                Estudiante estudiante = new Estudiante();
+                estudiante.setEmail(estud.getEmail());
+                estudiante.setNombre(estud.getNombre());
+                estudiante.setEstado(UsuarioEstado.INCOMPLETA);
+                estudiantesAdd.add(estudiante);
             }
         }
         
-        grupoExistente.getEstudiantes().removeAll(estudiantesDelete);
         grupoExistente.getEstudiantes().addAll(estudiantesAdd);
         estudianteRepository.saveAll(estudiantesAdd);
-        estudianteRepository.saveAll(estudiantesDelete);
         
         return ResponseEntity.ok(grupoRepository.save(grupoExistente));
     }
