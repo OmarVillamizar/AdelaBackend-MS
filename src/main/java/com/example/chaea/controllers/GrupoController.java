@@ -2,6 +2,7 @@ package com.example.chaea.controllers;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.chaea.dto.EstudianteCrearDTO;
 import com.example.chaea.dto.GrupoDTO;
+import com.example.chaea.dto.GrupoResumidoDTO;
 import com.example.chaea.entities.Estudiante;
 import com.example.chaea.entities.Grupo;
 import com.example.chaea.entities.Profesor;
@@ -96,10 +98,21 @@ public class GrupoController {
     
     @GetMapping
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
-    public ResponseEntity<List<Grupo>> listarGrupos() {
+    public ResponseEntity<List<GrupoResumidoDTO>> listarGrupos() {
         // Buscar el profesor por su correo electrónico
         Profesor profesor = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return ResponseEntity.ok(grupoRepository.findByProfesor(profesor));
+        List<GrupoResumidoDTO> gruposDTO = new LinkedList<>();
+        List<Grupo> grupos = grupoRepository.findByProfesor(profesor);
+        for(Grupo grupo : grupos) {
+            GrupoResumidoDTO grupoDT = new GrupoResumidoDTO();
+            grupoDT.setId(grupo.getId());
+            grupoDT.setNombre(grupo.getNombre());
+            grupoDT.setNumEstudiantes(grupo.getEstudiantes().size());
+            grupoDT.setProfesorEmail(grupo.getProfesor().getEmail());
+            grupoDT.setProfesorNombre(grupo.getProfesor().getNombre());
+            gruposDTO.add(grupoDT);
+        }
+        return ResponseEntity.ok(gruposDTO);
     }
     
     @GetMapping("/{id}")
