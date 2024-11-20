@@ -12,4 +12,5 @@ public class GrupoResumidoDTO {
     private String nombre;
     private String profesorNombre;
     private String profesorEmail;
+    private int numEstudiantes;
 }
