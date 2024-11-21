@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.chaea.dto.CategoriaResultadoDTO;
 import com.example.chaea.dto.CuestionarioResumidoDTO;
+import com.example.chaea.dto.EstudianteDTO;
+import com.example.chaea.dto.GrupoResumidoDTO;
 import com.example.chaea.dto.ListasCuestionariosDTO;
 import com.example.chaea.dto.PreguntaResueltaDTO;
 import com.example.chaea.dto.RespuestaCuestionarioDTO;
@@ -70,6 +72,10 @@ public class ResultadoCuestionarioService {
                 .findByCuestionarioAndEstudianteAndFechaResolucionIsNull(cuestionario, estudiante)
                 .orElseThrow(() -> new EntityNotFoundException("Al estudiante " + estudiante.getEmail()
                         + " no se le fue asignado el cuestionario " + cuestionario.getId()));
+        
+        if(resC.isBloqueado()) {
+            throw new RuntimeException("Este cuestionario está bloqueado y no se puede responder.");
+        }
         
         resC.setFechaResolucion(Date.valueOf(LocalDate.now()));
         resC = resultadoCuestionarioRepository.save(resC);
@@ -140,6 +146,7 @@ public class ResultadoCuestionarioService {
                 rc.setCuestionario(cuestionario);
                 rc.setEstudiante(estudiante);
                 rc.setFechaAplicacion(Date.valueOf(LocalDate.now()));
+                rc.setGrupo(grupo);
                 asignaciones.add(rc);
             }
         }
@@ -176,7 +183,8 @@ public class ResultadoCuestionarioService {
             CuestionarioResumidoDTO cdto = CuestionarioResumidoDTO.from(c);
             
             rcdto.setCuestionario(cdto);
-            rcdto.setEstudiante(rc.getEstudiante());
+            rcdto.setEstudiante(EstudianteDTO.from(rc.getEstudiante()));
+            rcdto.setGrupo(GrupoResumidoDTO.from(rc.getGrupo()));
             rcdto.setFechaAplicacion(rc.getFechaAplicacion());
             rcdto.setFechaResolucion(rc.getFechaResolucion());
             rcdto.setId(rc.getId());
@@ -209,7 +217,8 @@ public class ResultadoCuestionarioService {
         
         Cuestionario c = resC.getCuestionario();
         res.setCuestionario(CuestionarioResumidoDTO.from(c));
-        res.setEstudiante(resC.getEstudiante());
+        res.setEstudiante(EstudianteDTO.from(resC.getEstudiante()));
+        res.setGrupo(GrupoResumidoDTO.from(resC.getGrupo()));
         res.setFechaAplicacion(resC.getFechaAplicacion());
         res.setFechaResolucion(resC.getFechaResolucion());
         res.setId(resC.getId());

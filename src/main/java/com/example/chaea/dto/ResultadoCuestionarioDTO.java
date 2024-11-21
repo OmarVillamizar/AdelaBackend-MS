@@ -11,8 +11,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ResultadoCuestionarioDTO {
     private CuestionarioResumidoDTO cuestionario;
-    private Estudiante estudiante;
+    private EstudianteDTO estudiante;
     private Date fechaAplicacion;
     private Date fechaResolucion;
+    private GrupoResumidoDTO grupo;
     private Long id;
 }
