@@ -19,4 +19,6 @@ public interface ResultadoCuestionarioRepository extends JpaRepository<Resultado
     List<ResultadoCuestionario> findByEstudiante(Estudiante estudiante);
     
     List<ResultadoCuestionario> findByGrupo(Grupo grupo);
+    
+    List<ResultadoCuestionario> findByGrupoAndCuestionarioAndFechaResolucionIsNotNull(Grupo grupo, Cuestionario cuestionario);
 }

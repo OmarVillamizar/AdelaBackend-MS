@@ -17,7 +17,11 @@ public class GrupoResumidoDTO {
     private int numEstudiantes;
     
     public static GrupoResumidoDTO from(Grupo g) {
+        
         GrupoResumidoDTO gt = new GrupoResumidoDTO();
+        if(g == null) {
+            return gt;
+        }
         gt.setId(g.getId());
         gt.setNombre(g.getNombre());
         gt.setNumEstudiantes(g.getEstudiantes().size());
