@@ -18,6 +18,7 @@ import com.example.chaea.dto.RequestEstudianteEmail;
 import com.example.chaea.dto.RespuestaCuestionarioDTO;
 import com.example.chaea.entities.Cuestionario;
 import com.example.chaea.entities.Estudiante;
+import com.example.chaea.entities.Profesor;
 import com.example.chaea.services.CuestionarioService;
 import com.example.chaea.services.ResultadoCuestionarioService;
 
@@ -125,12 +126,38 @@ public class CuestionarioController {
         }
     }
     
-    @GetMapping("/mis-cuestionarios/resuelto/{id}")
+    @GetMapping("/mis-cuestionarios/resuelto/{idResultado}")
     @PreAuthorize("hasRole('ESTUDIANTE')")
-    public ResponseEntity<?> obtenerResultadoCuestionario(@PathVariable Long id){
+    public ResponseEntity<?> obtenerResultadoCuestionario(@PathVariable Long idResultado){
         try {
-            Estudiante estudiante = (Estudiante) SecurityContextHolder.getContext().getAuthentication().getPrincipal();;
-            return new ResponseEntity<>(resultadoCuestionarioService.obtenerResultadoCuestionario(id, estudiante) ,HttpStatus.OK);
+            Estudiante estudiante = (Estudiante) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return new ResponseEntity<>(resultadoCuestionarioService.obtenerResultadoCuestionario(idResultado, estudiante) ,HttpStatus.OK);
+        }catch(EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }catch(Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+    
+    @GetMapping("/reporte/{idCuestionario}/grupo/{idGrupo}")
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
+    public ResponseEntity<?> obtenerReporteGrupo(@PathVariable Long idCuestionario, @PathVariable Integer idGrupo){
+        try {
+            Profesor profesor = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return new ResponseEntity<>(resultadoCuestionarioService.obtenerResultadosGrupoCuestionario(idCuestionario, idGrupo, profesor), HttpStatus.OK);
+        }catch(EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }catch(Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+    
+    @GetMapping("/reporte-estudiante/{idCuestionarioResuelto}")
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
+    public ResponseEntity<?> obtenerReporteGrupo(@PathVariable Long idCuestionarioResuelto){
+        try {
+            Profesor profesor = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return new ResponseEntity<>(resultadoCuestionarioService.obtenerResultadoCuestionario(idCuestionarioResuelto), HttpStatus.OK);
         }catch(EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }catch(Exception e) {

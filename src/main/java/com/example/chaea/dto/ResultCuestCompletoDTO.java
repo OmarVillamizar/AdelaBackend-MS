@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class ResultCuestCompletoDTO extends ResultadoCuestionarioDTO{
+public class ResultCuestCompletoDTO extends ResultadoCuestionarioDTO {
     List<PreguntaResueltaDTO> preguntas;
     List<CategoriaResultadoDTO> categorias;
 }

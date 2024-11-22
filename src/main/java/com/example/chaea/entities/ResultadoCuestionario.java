@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -39,6 +40,13 @@ public class ResultadoCuestionario {
     private Estudiante estudiante;
     
     private Date fechaAplicacion;
+    
+    @ManyToOne
+    @JoinColumn(name = "grupo_id", referencedColumnName = "id", nullable = true)
+    @JsonBackReference
+    private Grupo grupo;
+    
+    private boolean bloqueado = false;
     
     @Nullable
     private Date fechaResolucion;

@@ -14,17 +14,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.chaea.dto.CategoriaResultadoDTO;
 import com.example.chaea.dto.CuestionarioResumidoDTO;
+import com.example.chaea.dto.EstudianteDTO;
+import com.example.chaea.dto.GrupoResumidoDTO;
 import com.example.chaea.dto.ListasCuestionariosDTO;
 import com.example.chaea.dto.PreguntaResueltaDTO;
 import com.example.chaea.dto.RespuestaCuestionarioDTO;
 import com.example.chaea.dto.ResultCuestCompletoDTO;
 import com.example.chaea.dto.ResultadoCuestionarioDTO;
+import com.example.chaea.dto.ResultadoGrupoDTO;
 import com.example.chaea.entities.Categoria;
 import com.example.chaea.entities.Cuestionario;
 import com.example.chaea.entities.Estudiante;
 import com.example.chaea.entities.Grupo;
 import com.example.chaea.entities.Opcion;
 import com.example.chaea.entities.Pregunta;
+import com.example.chaea.entities.Profesor;
 import com.example.chaea.entities.ResultadoCuestionario;
 import com.example.chaea.entities.ResultadoPregunta;
 import com.example.chaea.repositories.CuestionarioRepository;
@@ -70,6 +74,10 @@ public class ResultadoCuestionarioService {
                 .findByCuestionarioAndEstudianteAndFechaResolucionIsNull(cuestionario, estudiante)
                 .orElseThrow(() -> new EntityNotFoundException("Al estudiante " + estudiante.getEmail()
                         + " no se le fue asignado el cuestionario " + cuestionario.getId()));
+        
+        if(resC.isBloqueado()) {
+            throw new RuntimeException("Este cuestionario está bloqueado y no se puede responder.");
+        }
         
         resC.setFechaResolucion(Date.valueOf(LocalDate.now()));
         resC = resultadoCuestionarioRepository.save(resC);
@@ -140,6 +148,7 @@ public class ResultadoCuestionarioService {
                 rc.setCuestionario(cuestionario);
                 rc.setEstudiante(estudiante);
                 rc.setFechaAplicacion(Date.valueOf(LocalDate.now()));
+                rc.setGrupo(grupo);
                 asignaciones.add(rc);
             }
         }
@@ -176,7 +185,8 @@ public class ResultadoCuestionarioService {
             CuestionarioResumidoDTO cdto = CuestionarioResumidoDTO.from(c);
             
             rcdto.setCuestionario(cdto);
-            rcdto.setEstudiante(rc.getEstudiante());
+            rcdto.setEstudiante(EstudianteDTO.from(rc.getEstudiante()));
+            rcdto.setGrupo(GrupoResumidoDTO.from(rc.getGrupo()));
             rcdto.setFechaAplicacion(rc.getFechaAplicacion());
             rcdto.setFechaResolucion(rc.getFechaResolucion());
             rcdto.setId(rc.getId());
@@ -195,12 +205,17 @@ public class ResultadoCuestionarioService {
         return lcdto;
     }
     
+    public ResultCuestCompletoDTO obtenerResultadoCuestionario(Long cuestionarioResueltoId) {
+        ResultadoCuestionario resC = resultadoCuestionarioRepository.findById(cuestionarioResueltoId)
+                .orElseThrow(() -> new EntityNotFoundException("El resultado de id " + cuestionarioResueltoId + " no existe"));
+        return obtenerResultadoCuestionario(cuestionarioResueltoId, resC.getEstudiante());
+    }
+    
     public ResultCuestCompletoDTO obtenerResultadoCuestionario(Long cuestionarioResueltoId, Estudiante estudiante) {
         ResultCuestCompletoDTO res = new ResultCuestCompletoDTO();
         
         ResultadoCuestionario resC = resultadoCuestionarioRepository.findById(cuestionarioResueltoId)
-                .orElseThrow(() -> new EntityNotFoundException("Al estudiante " + estudiante.getEmail()
-                        + " el resultado de id " + cuestionarioResueltoId + " no pertenece al estudiante o no existe"));
+                .orElseThrow(() -> new EntityNotFoundException("El resultado de id " + cuestionarioResueltoId + " no pertenece al estudiante o no existe"));
         
         if (resC.getFechaResolucion() == null) {
             throw new EntityNotFoundException("El id " + cuestionarioResueltoId
@@ -209,7 +224,8 @@ public class ResultadoCuestionarioService {
         
         Cuestionario c = resC.getCuestionario();
         res.setCuestionario(CuestionarioResumidoDTO.from(c));
-        res.setEstudiante(resC.getEstudiante());
+        res.setEstudiante(EstudianteDTO.from(resC.getEstudiante()));
+        res.setGrupo(GrupoResumidoDTO.from(resC.getGrupo()));
         res.setFechaAplicacion(resC.getFechaAplicacion());
         res.setFechaResolucion(resC.getFechaResolucion());
         res.setId(resC.getId());
@@ -242,6 +258,70 @@ public class ResultadoCuestionarioService {
         
         res.setCategorias(categorias);
         res.setPreguntas(preguntas);
+        
+        return res;
+    }
+    
+    public ResultadoGrupoDTO obtenerResultadosGrupoCuestionario(Long cuestionarioId, Integer grupoId, Profesor profesor) {
+        
+        
+        Cuestionario cuestionario = cuestionarioRepository.findById(cuestionarioId)
+                .orElseThrow(() -> new EntityNotFoundException("No existe el cuestionario con id " + cuestionarioId));
+        
+        Grupo grupo = grupoRepository.findById(grupoId)
+                .orElseThrow(() -> new EntityNotFoundException("No existe el grupo con id " + grupoId));
+        
+        if(!grupo.getProfesor().getEmail().equalsIgnoreCase(profesor.getEmail())) {
+            throw new EntityNotFoundException("El grupo no pertenece a este profesor.");
+        }
+        
+        List<ResultadoCuestionario> rcs = resultadoCuestionarioRepository.findByGrupoAndCuestionarioAndFechaResolucionIsNotNull(grupo, cuestionario);
+        
+        if(rcs.size() == 0) {
+            throw new EntityNotFoundException("No hay resultados de aplicaciones de este cuestionario para este grupo.");
+        }
+        
+        ResultadoGrupoDTO res = new ResultadoGrupoDTO();
+        
+        res.setCuestionario(CuestionarioResumidoDTO.from(cuestionario));
+        res.setGrupo(GrupoResumidoDTO.from(grupo));        
+        
+        Map<Long, CategoriaResultadoDTO> mp = new TreeMap<>();
+        List<CategoriaResultadoDTO> categorias = new LinkedList<>();
+        List<ResultadoCuestionarioDTO> estudiantes = new LinkedList<>();
+        
+        
+        res.setFechaAplicacion(rcs.get(0).getFechaAplicacion());
+        Date rsl = rcs.get(0).getFechaResolucion();
+        
+        for (Categoria categoria : cuestionario.getCategorias()) {
+            CategoriaResultadoDTO cr = new CategoriaResultadoDTO();
+            cr.setNombre(categoria.getNombre());
+            cr.setValor(0d);
+            cr.setValorMaximo(categoria.getValorMaximo());
+            cr.setValorMinimo(categoria.getValorMinimo());
+            mp.put(categoria.getId(), cr);
+            categorias.add(cr);
+        }
+        
+        for(ResultadoCuestionario rc : rcs) {
+            rsl = new Date(Math.min(rsl.getTime(), rc.getFechaResolucion().getTime()));
+            for(ResultadoPregunta rp : rc.getPreguntas()) {
+                Opcion o = rp.getOpcion();
+                Categoria c = o.getCategoria();
+                CategoriaResultadoDTO crdto = mp.get(c.getId());
+                crdto.setValor(crdto.getValor() + o.getValor());
+            }
+            estudiantes.add(ResultadoCuestionarioDTO.from(rc));
+        }
+        
+        for(CategoriaResultadoDTO rca : mp.values()) {
+            rca.setValor(rca.getValor() / Double.valueOf(rcs.size()));
+        }
+        
+        res.setFechaResolucion(rsl);
+        res.setCategorias(categorias);
+        res.setEstudiantes(estudiantes);
         
         return res;
     }
