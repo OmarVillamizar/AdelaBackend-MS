@@ -15,6 +15,7 @@ import com.example.chaea.entities.Opcion;
 import com.example.chaea.entities.Pregunta;
 import com.example.chaea.repositories.CuestionarioRepository;
 import com.example.chaea.repositories.PreguntaRepository;
+import com.example.chaea.repositories.ResultadoPreguntaRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -26,6 +27,9 @@ public class PreguntaService {
     
     @Autowired
     private CuestionarioRepository cuestionarioRepository;
+    
+    @Autowired
+    private ResultadoPreguntaRepository resultadoPreguntaRepository;
     
     @Autowired
     private OpcionService opcionService;
@@ -42,13 +46,18 @@ public class PreguntaService {
     }
     
     public void eliminarPregunta(Pregunta pregunta) {
-        for(Opcion opcion : pregunta.getOpciones()) {
+        for (Opcion opcion : pregunta.getOpciones()) {
+            eliminarRespuestasAsociadas(opcion);
             opcionService.eliminarOpcion(opcion);
         }
         pregunta.getOpciones().clear();
         preguntaRepository.delete(pregunta);
     }
-    
+
+    private void eliminarRespuestasAsociadas(Opcion opcion) {
+        resultadoPreguntaRepository.deleteByOpcion(opcion);
+    }
+
     public Pregunta crearPregunta(Cuestionario cuestionario, Map<Integer, Categoria> mapId, PreguntaDTO preguntaDTO) {
         Pregunta preguntaSave = new Pregunta();
         preguntaSave.setCuestionario(cuestionario);

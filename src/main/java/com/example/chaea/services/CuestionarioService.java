@@ -19,6 +19,7 @@ import com.example.chaea.entities.Categoria;
 import com.example.chaea.entities.Cuestionario;
 import com.example.chaea.entities.Pregunta;
 import com.example.chaea.repositories.CuestionarioRepository;
+import com.example.chaea.repositories.ResultadoCuestionarioRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -28,6 +29,9 @@ public class CuestionarioService {
     @Autowired
     private CuestionarioRepository cuestionarioRepository;
     
+    @Autowired
+    private ResultadoCuestionarioRepository resultadoCuestionarioRepository;
+
     @Autowired
     private CategoriaService categoriaService;
     
@@ -86,6 +90,8 @@ public class CuestionarioService {
         Cuestionario cuestionario = cuestionarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Cuestionario no encontrado con el ID: " + id));
         
+        eliminarReferenciasAsociadas(cuestionario);
+        
         for(Pregunta pregunta : cuestionario.getPreguntas()) {
             preguntaService.eliminarPregunta(pregunta);
         }
@@ -94,10 +100,14 @@ public class CuestionarioService {
         for(Categoria categoria : cuestionario.getCategorias()) {
             categoriaService.eliminarCategoria(categoria);
         }
-        cuestionario.getPreguntas().clear();
+        cuestionario.getCategorias().clear();
         
         cuestionarioRepository.delete(cuestionario);
     }
+    
+    private void eliminarReferenciasAsociadas(Cuestionario cuestionario) { 
+    	resultadoCuestionarioRepository.deleteByCuestionario(cuestionario); 
+    	}
     
     public Cuestionario getCuestionarioPorId(Long id) {        
         return cuestionarioRepository.findById(id)

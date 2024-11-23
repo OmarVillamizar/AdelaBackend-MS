@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.chaea.entities.Cuestionario;
 import com.example.chaea.entities.Estudiante;
@@ -21,4 +24,7 @@ public interface ResultadoCuestionarioRepository extends JpaRepository<Resultado
     List<ResultadoCuestionario> findByGrupo(Grupo grupo);
     
     List<ResultadoCuestionario> findByGrupoAndCuestionario(Grupo grupo, Cuestionario cuestionario);
+    
+    @Transactional @Modifying @Query("DELETE FROM ResultadoCuestionario rc WHERE rc.cuestionario = :cuestionario") 
+    void deleteByCuestionario(Cuestionario cuestionario);
 }
