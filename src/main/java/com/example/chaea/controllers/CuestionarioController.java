@@ -163,4 +163,16 @@ public class CuestionarioController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+    
+    @GetMapping("/reporte/grupo/{idGrupo}")
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
+    public ResponseEntity<?> obtenerCuestionariosGrupo(@PathVariable Integer idGrupo){
+        try {
+            return new ResponseEntity<>(resultadoCuestionarioService.obtenerPorGrupo(idGrupo), HttpStatus.OK);
+        }catch(EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }catch(Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
 }

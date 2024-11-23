@@ -2,11 +2,13 @@ package com.example.chaea.services;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import com.example.chaea.dto.RespuestaCuestionarioDTO;
 import com.example.chaea.dto.ResultCuestCompletoDTO;
 import com.example.chaea.dto.ResultadoCuestionarioDTO;
 import com.example.chaea.dto.ResultadoGrupoDTO;
+import com.example.chaea.dto.ResultadoGrupoResumidoDTO;
 import com.example.chaea.entities.Categoria;
 import com.example.chaea.entities.Cuestionario;
 import com.example.chaea.entities.Estudiante;
@@ -328,6 +331,32 @@ public class ResultadoCuestionarioService {
         res.setCategorias(categorias);
         res.setEstudiantesResuelto(estudiantesS);
         res.setEstudiantesNoResuelto(estudiantesUS);
+        
+        return res;
+    }
+    
+    public List<ResultadoGrupoResumidoDTO> obtenerPorGrupo(Integer grupoId){
+        Grupo grupo = grupoRepository.findById(grupoId)
+                .orElseThrow(() -> new EntityNotFoundException("No existe el grupo con id " + grupoId));
+        
+        List<ResultadoCuestionario> cuestos = resultadoCuestionarioRepository.findByGrupo(grupo);
+        
+        List<ResultadoGrupoResumidoDTO> res = new LinkedList<>();
+        
+        Set<ResultadoCuestionario> dif = new TreeSet<>(new Comparator<ResultadoCuestionario>() {
+            @Override
+            public int compare(ResultadoCuestionario a, ResultadoCuestionario b) {
+                return a.getCuestionario().getId().compareTo(b.getCuestionario().getId());
+            }
+        });
+        
+        for(ResultadoCuestionario rc : cuestos) {
+            dif.add(rc);
+        }
+        
+        for(ResultadoCuestionario rc : dif) {
+            res.add(ResultadoGrupoResumidoDTO.from(rc));
+        }
         
         return res;
     }
