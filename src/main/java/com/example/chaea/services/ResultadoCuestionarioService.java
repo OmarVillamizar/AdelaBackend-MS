@@ -145,15 +145,12 @@ public class ResultadoCuestionarioService {
         Set<Estudiante> estudiantes = grupo.getEstudiantes();
         List<ResultadoCuestionario> asignaciones = new LinkedList<>();
         for (Estudiante estudiante : estudiantes) {
-            if (resultadoCuestionarioRepository
-                    .findByCuestionarioAndEstudianteAndFechaResolucionIsNull(cuestionario, estudiante).isEmpty()) {
-                ResultadoCuestionario rc = new ResultadoCuestionario();
-                rc.setCuestionario(cuestionario);
-                rc.setEstudiante(estudiante);
-                rc.setFechaAplicacion(Date.valueOf(LocalDate.now()));
-                rc.setGrupo(grupo);
-                asignaciones.add(rc);
-            }
+            ResultadoCuestionario rc = new ResultadoCuestionario();
+            rc.setCuestionario(cuestionario);
+            rc.setEstudiante(estudiante);
+            rc.setFechaAplicacion(Date.valueOf(LocalDate.now()));
+            rc.setGrupo(grupo);
+            asignaciones.add(rc);
         }
         resultadoCuestionarioRepository.saveAll(asignaciones);
     }
