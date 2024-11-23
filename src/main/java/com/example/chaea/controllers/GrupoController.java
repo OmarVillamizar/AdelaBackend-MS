@@ -71,6 +71,9 @@ public class GrupoController {
         if (grupoDTO.getEstudiantes() != null) {
             for (EstudianteCrearDTO estudiante : grupoDTO.getEstudiantes()) {
                 String email = estudiante.getEmail();
+                if(!EMAIL_PATTERN.matcher(email).matches()) {
+                    continue;
+                }
                 String nombre = estudiante.getNombre();
                 Optional<Estudiante> estudianteOpt = estudianteRepository.findById(email);
                 if (estudianteOpt.isPresent()) {
@@ -167,6 +170,9 @@ public class GrupoController {
                     estudiantesAdd.add(estudiante);
                 }
             } else {
+                if(!EMAIL_PATTERN.matcher(estud.getEmail()).matches()) {
+                    continue;
+                }
                 Estudiante estudiante = new Estudiante();
                 estudiante.setEmail(estud.getEmail());
                 estudiante.setNombre(estud.getNombre());
