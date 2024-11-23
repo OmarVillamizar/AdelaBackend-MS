@@ -275,12 +275,14 @@ public class ResultadoCuestionarioService {
             throw new EntityNotFoundException("El grupo no pertenece a este profesor.");
         }
         
-        List<ResultadoCuestionario> rcs = resultadoCuestionarioRepository.findByGrupoAndCuestionarioAndFechaResolucionIsNotNull(grupo, cuestionario);
+        List<ResultadoCuestionario> rcs = resultadoCuestionarioRepository.findByGrupoAndCuestionario(grupo, cuestionario);
         
         if(rcs.size() == 0) {
-            throw new EntityNotFoundException("No hay resultados de aplicaciones de este cuestionario para este grupo.");
+            throw new EntityNotFoundException("Este cuestionario no ha sido asignado a ningun estudiante.");
         }
         
+        int cnt = 0;
+
         ResultadoGrupoDTO res = new ResultadoGrupoDTO();
         
         res.setCuestionario(CuestionarioResumidoDTO.from(cuestionario));
@@ -288,12 +290,12 @@ public class ResultadoCuestionarioService {
         
         Map<Long, CategoriaResultadoDTO> mp = new TreeMap<>();
         List<CategoriaResultadoDTO> categorias = new LinkedList<>();
-        List<ResultadoCuestionarioDTO> estudiantes = new LinkedList<>();
+        List<ResultadoCuestionarioDTO> estudiantesS = new LinkedList<>();
+        List<ResultadoCuestionarioDTO> estudiantesUS = new LinkedList<>();
         
         
         res.setFechaAplicacion(rcs.get(0).getFechaAplicacion());
-        Date rsl = rcs.get(0).getFechaResolucion();
-        
+       
         for (Categoria categoria : cuestionario.getCategorias()) {
             CategoriaResultadoDTO cr = new CategoriaResultadoDTO();
             cr.setNombre(categoria.getNombre());
@@ -305,23 +307,27 @@ public class ResultadoCuestionarioService {
         }
         
         for(ResultadoCuestionario rc : rcs) {
-            rsl = new Date(Math.min(rsl.getTime(), rc.getFechaResolucion().getTime()));
-            for(ResultadoPregunta rp : rc.getPreguntas()) {
-                Opcion o = rp.getOpcion();
-                Categoria c = o.getCategoria();
-                CategoriaResultadoDTO crdto = mp.get(c.getId());
-                crdto.setValor(crdto.getValor() + o.getValor());
+            if(rc.getFechaResolucion() != null) {
+                cnt++;
+                for(ResultadoPregunta rp : rc.getPreguntas()) {
+                    Opcion o = rp.getOpcion();
+                    Categoria c = o.getCategoria();
+                    CategoriaResultadoDTO crdto = mp.get(c.getId());
+                    crdto.setValor(crdto.getValor() + o.getValor());
+                }
+                estudiantesS.add(ResultadoCuestionarioDTO.from(rc));
+            }else {
+                estudiantesUS.add(ResultadoCuestionarioDTO.from(rc));
             }
-            estudiantes.add(ResultadoCuestionarioDTO.from(rc));
         }
         
         for(CategoriaResultadoDTO rca : mp.values()) {
-            rca.setValor(rca.getValor() / Double.valueOf(rcs.size()));
+            rca.setValor(rca.getValor() / Double.valueOf(cnt));
         }
         
-        res.setFechaResolucion(rsl);
         res.setCategorias(categorias);
-        res.setEstudiantes(estudiantes);
+        res.setEstudiantesResuelto(estudiantesS);
+        res.setEstudiantesNoResuelto(estudiantesUS);
         
         return res;
     }

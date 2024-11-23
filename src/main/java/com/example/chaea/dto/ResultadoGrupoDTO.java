@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ResultadoGrupoDTO extends ResultadoGrupoResumidoDTO {
     private List<CategoriaResultadoDTO> categorias;
-    private List<ResultadoCuestionarioDTO> estudiantes;
+    private List<ResultadoCuestionarioDTO> estudiantesResuelto;
+    private List<ResultadoCuestionarioDTO> estudiantesNoResuelto;
 }

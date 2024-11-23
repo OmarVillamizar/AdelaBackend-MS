@@ -154,9 +154,8 @@ public class CuestionarioController {
     
     @GetMapping("/reporte-estudiante/{idCuestionarioResuelto}")
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
-    public ResponseEntity<?> obtenerReporteGrupo(@PathVariable Long idCuestionarioResuelto){
+    public ResponseEntity<?> obtenerReporteEstudiante(@PathVariable Long idCuestionarioResuelto){
         try {
-            Profesor profesor = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return new ResponseEntity<>(resultadoCuestionarioService.obtenerResultadoCuestionario(idCuestionarioResuelto), HttpStatus.OK);
         }catch(EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
