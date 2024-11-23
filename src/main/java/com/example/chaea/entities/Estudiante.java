@@ -28,8 +28,7 @@ public class Estudiante extends Usuario {
     @Nullable
     private Genero genero;
 
-    @Nullable
-    private Date fecha_nacimiento;
+    private Date fecha_nacimiento = Date.valueOf("2000-01-01");
 
     @ManyToMany
     @JoinTable(
