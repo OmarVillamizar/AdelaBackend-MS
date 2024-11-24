@@ -8,6 +8,7 @@ import java.util.function.Function;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.example.chaea.entities.Usuario;
@@ -19,7 +20,8 @@ import io.jsonwebtoken.Jwts;
 @Component
 public class JwtUtil {
 
-    private final String SECRET = "c40b18859af2d07e57a71bfcb7d3508325863293319c5d2f7816741fc734f696";  // Generación de la clave segura
+    @Value("${jwt.secret}")
+    private String SECRET;  // Generación de la clave segura
     private final int HOURS = 4;
 
     // Extraer email del token
