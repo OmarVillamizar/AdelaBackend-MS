@@ -5,13 +5,13 @@ spring:
         url: ${DATABASE_URL}
         username: ${DATABASE_USERNAME}
         password: ${DATABASE_PASSWORD}
-        driver-class-name: org.mariadb.jdbc.Driver
+        driver-class-name: ${DATABASE_DRIVER_NAME}
     jpa:
         hibernate:
             ddl-auto: update
         properties: 
             hibernate:
-                dialect: org.hibernate.dialect.MariaDBDialect
+                dialect: ${HIBERNATE_DIALECT}
         generate-ddl: true
     application:
         name: chaea
@@ -20,8 +20,8 @@ spring:
             client:
                 registration:
                     google:
-                        client-id: 82296007466-9a641tum32kufd180hg7p9nol7dcsglg.apps.googleusercontent.com
-                        client-secret: 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
+                        client-id: ${GOOGLE_CLIENT_ID}
+                        client-secret: ${GOOGLE_CLIENT_SECRET}
                         scope: profile, email
                 provider:
                     google:
