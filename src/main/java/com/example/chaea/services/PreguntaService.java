@@ -2,7 +2,9 @@ package com.example.chaea.services;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,11 +55,11 @@ public class PreguntaService {
         pregunta.getOpciones().clear();
         preguntaRepository.delete(pregunta);
     }
-
+    
     private void eliminarRespuestasAsociadas(Opcion opcion) {
         resultadoPreguntaRepository.deleteByOpcion(opcion);
     }
-
+    
     public Pregunta crearPregunta(Cuestionario cuestionario, Map<Integer, Categoria> mapId, PreguntaDTO preguntaDTO) {
         Pregunta preguntaSave = new Pregunta();
         preguntaSave.setCuestionario(cuestionario);
@@ -65,20 +67,38 @@ public class PreguntaService {
         preguntaSave.setOrden(preguntaDTO.getOrden());
         
         Pregunta pregunta = preguntaRepository.save(preguntaSave);
-                
+        
         Set<Opcion> opciones = new HashSet<>();
-
-        for(OpcionDTO opcionDTO : preguntaDTO.getOpciones()) {
+        Map<Integer,Double> max = new TreeMap<Integer,Double>();
+        Map<Integer,Double> min = new TreeMap<Integer,Double>();
+        
+        for (OpcionDTO opcionDTO : preguntaDTO.getOpciones()) {
+            int cateId = opcionDTO.getCategoriaId();
             Categoria categoria = mapId.get(opcionDTO.getCategoriaId());
-
-            if(categoria == null) {
-                throw new RuntimeException("No existe una categoría con id "+opcionDTO.getCategoriaId()+" en la solicitud.");
+            
+            if (!mapId.containsKey(cateId)) {
+                throw new RuntimeException(
+                        "No existe una categoría con id " + opcionDTO.getCategoriaId() + " en la solicitud.");
             }
             Opcion opcion = opcionService.crearOpcion(pregunta, categoria, opcionDTO);
             opciones.add(opcion);
-            
-            categoria.setValorMaximo(categoria.getValorMaximo()+opcion.getValor());
-            categoria.setValorMinimo(Math.min(categoria.getValorMinimo(), opcion.getValor()));
+            if(max.containsKey(cateId)) {
+                max.put(cateId, Math.max(max.get(cateId), opcion.getValor()));
+                min.put(cateId, Math.min(min.get(cateId), opcion.getValor()));
+            }else {
+                max.put(cateId, opcion.getValor());
+                min.put(cateId, opcion.getValor());
+            }
+        }
+        
+        for(Entry<Integer, Double> pair : max.entrySet()) {
+            Categoria categoria = mapId.get(pair.getKey());
+            categoria.setValorMaximo(categoria.getValorMaximo()+pair.getValue());
+        }
+        
+        for(Entry<Integer, Double> pair : min.entrySet()) {
+            Categoria categoria = mapId.get(pair.getKey());
+            categoria.setValorMinimo(categoria.getValorMinimo()+pair.getValue());
         }
         
         pregunta.setOpciones(opciones);
