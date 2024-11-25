@@ -9,7 +9,7 @@
         <version>3.3.4</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
-
+    
     <groupId>com.example</groupId>
     <artifactId>chaea</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -98,6 +98,12 @@
             <artifactId>mariadb-java-client</artifactId>
         </dependency>
         <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
@@ -170,7 +176,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.example.demo.ChaeaApplication</mainClass>
+                    <mainClass>com.example.chaea.ChaeaApplication</mainClass>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

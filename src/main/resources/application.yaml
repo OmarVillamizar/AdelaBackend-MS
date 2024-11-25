@@ -32,7 +32,9 @@ spring:
             resourceserver:
                 jwt:
                       issuer-uri: https://accounts.google.com
-                      jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+                      jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs}
+cors:
+  allowed-origins: ${ALLOWED_ORIGINS}
 springdoc:
     api-docs:
         enabled: true
@@ -42,4 +44,4 @@ springdoc:
         path: /docs/swagger-ui.html
         
 server:
-  port: 8091
+  port: ${PORT}
