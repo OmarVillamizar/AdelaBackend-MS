@@ -158,6 +158,28 @@ public class ProfesorController {
         return ResponseEntity.ok(profesorRepository.save(profesor));
     }
     
+    @PutMapping("/demote/{email}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<?> bajarCuentaProfesor(@PathVariable String email) {
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Formato de correo incorrecto: " + email);
+        }
+        Optional<Profesor> profesorOptional = profesorRepository.findById(email);
+        if (!profesorOptional.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profesor no encontrado con el correo: " + email);
+        }
+        
+        Profesor profesor = profesorOptional.get();
+        
+        if (profesor.getEstado() != UsuarioEstado.ACTIVA) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Cuenta de profesor no está activa, no se puede hacer administrador: " + email);
+        }
+        
+        profesor.setRol(rolRepository.findByDescripcion("PROFESOR").get());
+        return ResponseEntity.ok(profesorRepository.save(profesor));
+    }
+    
     @DeleteMapping("/reject/{email}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> rechazarSolicitudCuentaProfesor(@PathVariable String email) {
