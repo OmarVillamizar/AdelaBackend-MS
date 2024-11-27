@@ -2,6 +2,7 @@ package com.example.chaea.controllers;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,10 +47,19 @@ public class AuthController {
         return "index"; // Return index.html
     }
     
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@ufps.edu.co$");
+    
     @GetMapping("/login/success/estud")
     public void loginSuccessEstudiante(HttpServletResponse response, HttpServletRequest request,
             OAuth2AuthenticationToken authentication, @RequestParam String redirect_to) throws IOException {
         String email = authentication.getPrincipal().getAttribute("email");
+        /*
+        if(!EMAIL_PATTERN.matcher(email).matches()) {
+            response.sendRedirect(
+                    redirect_to + "?error=Formato de correo incorrecto, '" + email + "' no es un correo institucional UFPS");
+            return;
+        }
+        */
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
         Usuario usuario;
         logger.info("will redirecto to " + redirect_to);
@@ -83,6 +93,13 @@ public class AuthController {
     public void loginSuccessProfesor(OAuth2AuthenticationToken authentication, HttpServletResponse response,
             @RequestParam String redirect_to) throws IOException {
         String email = authentication.getPrincipal().getAttribute("email");
+        /*
+        if(!EMAIL_PATTERN.matcher(email).matches()) {
+            response.sendRedirect(
+                    redirect_to + "?error=Formato de correo incorrecto, '" + email + "' no es un correo institucional UFPS");
+            return;
+        }
+        */
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
         Usuario usuario;
         if (usuarioOpt.isEmpty()) {
