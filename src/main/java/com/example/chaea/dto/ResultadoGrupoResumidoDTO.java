@@ -13,7 +13,8 @@ public class ResultadoGrupoResumidoDTO {
     public CuestionarioResumidoDTO cuestionario;
     public Date fechaAplicacion;
     public Date fechaResolucion;
-    public GrupoResumidoDTO grupo;    
+    public GrupoResumidoDTO grupo;   
+    public boolean bloqueado;
     
     public static ResultadoGrupoResumidoDTO from(ResultadoCuestionario rc) {
         ResultadoGrupoResumidoDTO rg = new ResultadoGrupoResumidoDTO();
@@ -21,6 +22,7 @@ public class ResultadoGrupoResumidoDTO {
         rg.setFechaResolucion(rc.getFechaResolucion());
         rg.setCuestionario(CuestionarioResumidoDTO.from(rc.getCuestionario()));
         rg.setGrupo(GrupoResumidoDTO.from(rc.getGrupo()));
+        rg.setBloqueado(rc.isBloqueado());
         return rg;
     }
 }

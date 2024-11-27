@@ -78,7 +78,7 @@ public class ResultadoCuestionarioService {
                 .orElseThrow(() -> new EntityNotFoundException("Al estudiante " + estudiante.getEmail()
                         + " no se le fue asignado el cuestionario " + cuestionario.getId()));
         
-        if(resC.isBloqueado()) {
+        if (resC.isBloqueado()) {
             throw new RuntimeException("Este cuestionario está bloqueado y no se puede responder.");
         }
         
@@ -94,9 +94,9 @@ public class ResultadoCuestionarioService {
         for (Long opcionId : info.getOpcionesSeleccionadasId()) {
             ResultadoPregunta rp = responderPregunta(opcionId, resC);
             Long preguntaId = rp.getOpcion().getPregunta().getId();
-            if (answered.containsKey(preguntaId)) {
-                throw new RuntimeException(
-                        "La pregunta " + answered.get(preguntaId).getOrden() + " tuvo mas de una opcion seleccionada("+rp.getOpcion().getOrden()+").");
+            if (answered.containsKey(preguntaId) && !rp.getOpcion().getPregunta().isOpcionMultiple()) {
+                throw new RuntimeException("La pregunta " + answered.get(preguntaId).getOrden()
+                        + " tuvo mas de una opcion seleccionada(" + rp.getOpcion().getOrden() + ").");
             }
             answered.put(preguntaId, rp.getOpcion().getPregunta());
             unAnswered.remove(preguntaId);
@@ -172,7 +172,7 @@ public class ResultadoCuestionarioService {
     }
     
     public ListasCuestionariosDTO obtenerCuestionarios(Estudiante estudiante) {
-        List<ResultadoCuestionario> info = resultadoCuestionarioRepository.findByEstudiante(estudiante);
+        List<ResultadoCuestionario> info = resultadoCuestionarioRepository.findByEstudianteAndBloqueadoFalse(estudiante);
         
         List<ResultadoCuestionarioDTO> pendientes = new LinkedList<>();
         List<ResultadoCuestionarioDTO> resueltos = new LinkedList<>();
@@ -206,8 +206,8 @@ public class ResultadoCuestionarioService {
     }
     
     public ResultCuestCompletoDTO obtenerResultadoCuestionario(Long cuestionarioResueltoId) {
-        ResultadoCuestionario resC = resultadoCuestionarioRepository.findById(cuestionarioResueltoId)
-                .orElseThrow(() -> new EntityNotFoundException("El resultado de id " + cuestionarioResueltoId + " no existe"));
+        ResultadoCuestionario resC = resultadoCuestionarioRepository.findById(cuestionarioResueltoId).orElseThrow(
+                () -> new EntityNotFoundException("El resultado de id " + cuestionarioResueltoId + " no existe"));
         return obtenerResultadoCuestionario(cuestionarioResueltoId, resC.getEstudiante());
     }
     
@@ -215,7 +215,8 @@ public class ResultadoCuestionarioService {
         ResultCuestCompletoDTO res = new ResultCuestCompletoDTO();
         
         ResultadoCuestionario resC = resultadoCuestionarioRepository.findById(cuestionarioResueltoId)
-                .orElseThrow(() -> new EntityNotFoundException("El resultado de id " + cuestionarioResueltoId + " no pertenece al estudiante o no existe"));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "El resultado de id " + cuestionarioResueltoId + " no pertenece al estudiante o no existe"));
         
         if (resC.getFechaResolucion() == null) {
             throw new EntityNotFoundException("El id " + cuestionarioResueltoId
@@ -231,8 +232,8 @@ public class ResultadoCuestionarioService {
         res.setId(resC.getId());
         
         Map<Long, CategoriaResultadoDTO> mp = new TreeMap<>();
+        Map<Long, PreguntaResueltaDTO> preg = new TreeMap<>();
         List<CategoriaResultadoDTO> categorias = new LinkedList<>();
-        List<PreguntaResueltaDTO> preguntas = new LinkedList<>();
         
         for (Categoria categoria : c.getCategorias()) {
             CategoriaResultadoDTO cr = new CategoriaResultadoDTO();
@@ -245,25 +246,50 @@ public class ResultadoCuestionarioService {
         }
         
         for (ResultadoPregunta rep : resC.getPreguntas()) {
-            PreguntaResueltaDTO pr = new PreguntaResueltaDTO();
             Opcion o = rep.getOpcion();
             Pregunta p = o.getPregunta();
-            pr.setPregunta(p.getPregunta());
-            pr.setRespuesta(o.getRespuesta());
-            pr.setOrden(p.getOrden());
+            PreguntaResueltaDTO pr = new PreguntaResueltaDTO();
+            if(preg.containsKey(p.getId())) {
+                pr = preg.get(p.getId());
+            }else {
+                pr.setPregunta(p.getPregunta());
+                pr.setRespuestas(new LinkedList<String>());
+                pr.setOrden(p.getOrden());
+            }
+            pr.getRespuestas().add(o.getRespuesta());
             CategoriaResultadoDTO cr = mp.get(o.getCategoria().getId());
             cr.setValor(cr.getValor() + o.getValor());
-            preguntas.add(pr);
         }
         
         res.setCategorias(categorias);
-        res.setPreguntas(preguntas);
+        res.setPreguntas(new LinkedList<>(preg.values()));
         
         return res;
     }
     
-    public ResultadoGrupoDTO obtenerResultadosGrupoCuestionario(Long cuestionarioId, Integer grupoId, Profesor profesor) {
+    public void toggleBloqueoCuestionario(Long cuestionarioId, Integer grupoId, Profesor profesor) {
+        Cuestionario cuestionario = cuestionarioRepository.findById(cuestionarioId)
+                .orElseThrow(() -> new EntityNotFoundException("No existe el cuestionario con id " + cuestionarioId));
         
+        Grupo grupo = grupoRepository.findById(grupoId)
+                .orElseThrow(() -> new EntityNotFoundException("No existe el grupo con id " + grupoId));
+        
+        if (!grupo.getProfesor().getEmail().equalsIgnoreCase(profesor.getEmail())) {
+            throw new EntityNotFoundException("El grupo no pertenece a este profesor.");
+        }
+        
+        List<ResultadoCuestionario> rcs = resultadoCuestionarioRepository.findByGrupoAndCuestionario(grupo,
+                cuestionario);
+        
+        for(ResultadoCuestionario rc : rcs) {
+            rc.setBloqueado(!rc.isBloqueado());
+        }
+        
+        resultadoCuestionarioRepository.saveAll(rcs);
+    }
+    
+    public ResultadoGrupoDTO obtenerResultadosGrupoCuestionario(Long cuestionarioId, Integer grupoId,
+            Profesor profesor) {
         
         Cuestionario cuestionario = cuestionarioRepository.findById(cuestionarioId)
                 .orElseThrow(() -> new EntityNotFoundException("No existe el cuestionario con id " + cuestionarioId));
@@ -271,31 +297,31 @@ public class ResultadoCuestionarioService {
         Grupo grupo = grupoRepository.findById(grupoId)
                 .orElseThrow(() -> new EntityNotFoundException("No existe el grupo con id " + grupoId));
         
-        if(!grupo.getProfesor().getEmail().equalsIgnoreCase(profesor.getEmail())) {
+        if (!grupo.getProfesor().getEmail().equalsIgnoreCase(profesor.getEmail())) {
             throw new EntityNotFoundException("El grupo no pertenece a este profesor.");
         }
         
-        List<ResultadoCuestionario> rcs = resultadoCuestionarioRepository.findByGrupoAndCuestionario(grupo, cuestionario);
+        List<ResultadoCuestionario> rcs = resultadoCuestionarioRepository.findByGrupoAndCuestionario(grupo,
+                cuestionario);
         
-        if(rcs.size() == 0) {
+        if (rcs.size() == 0) {
             throw new EntityNotFoundException("Este cuestionario no ha sido asignado a ningun estudiante.");
         }
         
         int cnt = 0;
-
+        
         ResultadoGrupoDTO res = new ResultadoGrupoDTO();
         
         res.setCuestionario(CuestionarioResumidoDTO.from(cuestionario));
-        res.setGrupo(GrupoResumidoDTO.from(grupo));        
+        res.setGrupo(GrupoResumidoDTO.from(grupo));
         
         Map<Long, CategoriaResultadoDTO> mp = new TreeMap<>();
         List<CategoriaResultadoDTO> categorias = new LinkedList<>();
         List<ResultadoCuestionarioDTO> estudiantesS = new LinkedList<>();
         List<ResultadoCuestionarioDTO> estudiantesUS = new LinkedList<>();
         
-        
         res.setFechaAplicacion(rcs.get(0).getFechaAplicacion());
-       
+        
         for (Categoria categoria : cuestionario.getCategorias()) {
             CategoriaResultadoDTO cr = new CategoriaResultadoDTO();
             cr.setNombre(categoria.getNombre());
@@ -306,22 +332,22 @@ public class ResultadoCuestionarioService {
             categorias.add(cr);
         }
         
-        for(ResultadoCuestionario rc : rcs) {
-            if(rc.getFechaResolucion() != null) {
+        for (ResultadoCuestionario rc : rcs) {
+            if (rc.getFechaResolucion() != null) {
                 cnt++;
-                for(ResultadoPregunta rp : rc.getPreguntas()) {
+                for (ResultadoPregunta rp : rc.getPreguntas()) {
                     Opcion o = rp.getOpcion();
                     Categoria c = o.getCategoria();
                     CategoriaResultadoDTO crdto = mp.get(c.getId());
                     crdto.setValor(crdto.getValor() + o.getValor());
                 }
                 estudiantesS.add(ResultadoCuestionarioDTO.from(rc));
-            }else {
+            } else {
                 estudiantesUS.add(ResultadoCuestionarioDTO.from(rc));
             }
         }
         
-        for(CategoriaResultadoDTO rca : mp.values()) {
+        for (CategoriaResultadoDTO rca : mp.values()) {
             rca.setValor(rca.getValor() / Double.valueOf(cnt));
         }
         
@@ -332,7 +358,7 @@ public class ResultadoCuestionarioService {
         return res;
     }
     
-    public List<ResultadoGrupoResumidoDTO> obtenerPorGrupo(Integer grupoId){
+    public List<ResultadoGrupoResumidoDTO> obtenerPorGrupo(Integer grupoId) {
         Grupo grupo = grupoRepository.findById(grupoId)
                 .orElseThrow(() -> new EntityNotFoundException("No existe el grupo con id " + grupoId));
         
@@ -347,11 +373,11 @@ public class ResultadoCuestionarioService {
             }
         });
         
-        for(ResultadoCuestionario rc : cuestos) {
+        for (ResultadoCuestionario rc : cuestos) {
             dif.add(rc);
         }
         
-        for(ResultadoCuestionario rc : dif) {
+        for (ResultadoCuestionario rc : dif) {
             res.add(ResultadoGrupoResumidoDTO.from(rc));
         }
         

@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -169,6 +170,20 @@ public class CuestionarioController {
     public ResponseEntity<?> obtenerCuestionariosGrupo(@PathVariable Integer idGrupo){
         try {
             return new ResponseEntity<>(resultadoCuestionarioService.obtenerPorGrupo(idGrupo), HttpStatus.OK);
+        }catch(EntityNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }catch(Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+    
+    @PatchMapping("/reporte/{idCuestionario}/grupo/{idGrupo}")
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
+    public ResponseEntity<?> toggleBloqueo(@PathVariable Long idCuestionario, @PathVariable Integer idGrupo){
+        try {
+            Profesor profesor = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            resultadoCuestionarioService.toggleBloqueoCuestionario(idCuestionario, idGrupo, profesor);
+            return new ResponseEntity<>("ok", HttpStatus.OK);
         }catch(EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }catch(Exception e) {
