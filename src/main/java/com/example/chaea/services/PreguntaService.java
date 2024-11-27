@@ -83,13 +83,24 @@ public class PreguntaService {
             }
             Opcion opcion = opcionService.crearOpcion(pregunta, categoria, opcionDTO);
             opciones.add(opcion);
-            if(max.containsKey(cateId)) {
-                max.put(cateId, Math.max(max.get(cateId), opcion.getValor()));
-                min.put(cateId, Math.min(min.get(cateId), opcion.getValor()));
+            if(pregunta.isOpcionMultiple()) {
+                if(max.containsKey(cateId)) {
+                    max.put(cateId, Math.max(max.get(cateId), max.get(cateId)+opcion.getValor()));
+                    min.put(cateId, Math.min(min.get(cateId), min.get(cateId)+opcion.getValor()));
+                }else {
+                    max.put(cateId, opcion.getValor());
+                    min.put(cateId, 0d);
+                }
             }else {
-                max.put(cateId, opcion.getValor());
-                min.put(cateId, opcion.getValor());
+                if(max.containsKey(cateId)) {
+                    max.put(cateId, Math.max(max.get(cateId), opcion.getValor()));
+                    min.put(cateId, Math.min(min.get(cateId), opcion.getValor()));
+                }else {
+                    max.put(cateId, opcion.getValor());
+                    min.put(cateId, opcion.getValor());
+                }
             }
+            
         }
         
         for(Entry<Integer, Double> pair : max.entrySet()) {

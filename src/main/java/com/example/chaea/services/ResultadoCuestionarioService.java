@@ -89,7 +89,9 @@ public class ResultadoCuestionarioService {
         Map<Long, Pregunta> answered = new TreeMap<>();
         Map<Long, Pregunta> unAnswered = new TreeMap<>();
         for (Pregunta pregunta : preguntas) {
-            unAnswered.put(pregunta.getId(), pregunta);
+            if(!pregunta.isOpcionMultiple()) {
+                unAnswered.put(pregunta.getId(), pregunta);
+            }
         }
         for (Long opcionId : info.getOpcionesSeleccionadasId()) {
             ResultadoPregunta rp = responderPregunta(opcionId, resC);
@@ -99,9 +101,7 @@ public class ResultadoCuestionarioService {
                         + " tuvo mas de una opcion seleccionada(" + rp.getOpcion().getOrden() + ").");
             }
             answered.put(preguntaId, rp.getOpcion().getPregunta());
-            if (!rp.getOpcion().getPregunta().isOpcionMultiple()) {
-                unAnswered.remove(preguntaId);
-            }
+            unAnswered.remove(preguntaId);
             resultadoPreguntas.add(rp);
         }
         
@@ -262,6 +262,7 @@ public class ResultadoCuestionarioService {
             pr.getRespuestas().add(o.getRespuesta());
             CategoriaResultadoDTO cr = mp.get(o.getCategoria().getId());
             cr.setValor(cr.getValor() + o.getValor());
+            preg.put(p.getId(), pr);
         }
         
         for(Pregunta p : c.getPreguntas()) {
@@ -270,9 +271,10 @@ public class ResultadoCuestionarioService {
                 pr.setOrden(p.getOrden());
                 pr.setPregunta(p.getPregunta());
                 pr.setRespuestas(new LinkedList<>());
+                preg.put(p.getId(), pr);
             }
         }
-        
+        System.out.println(preg.values());
         res.setCategorias(categorias);
         res.setPreguntas(new LinkedList<>(preg.values()));
         
