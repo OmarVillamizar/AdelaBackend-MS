@@ -1,5 +1,7 @@
 package com.example.chaea.dto;
 
+import java.util.List;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,5 +10,5 @@ import lombok.NoArgsConstructor;
 public class PreguntaResueltaDTO {
     private String pregunta;
     private int orden;
-    private String respuesta;
+    private List<String> respuestas;
 }

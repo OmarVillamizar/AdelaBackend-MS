@@ -42,6 +42,8 @@ public class Pregunta {
     @Column(nullable = false)
     private int orden;
     
+    private boolean opcionMultiple = false;
+    
     @OneToMany(mappedBy = "pregunta", cascade = CascadeType.ALL, orphanRemoval = true)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude

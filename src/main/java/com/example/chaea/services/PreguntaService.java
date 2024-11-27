@@ -36,7 +36,7 @@ public class PreguntaService {
     @Autowired
     private OpcionService opcionService;
     
-    public Pregunta crearPregunta(Long idCuestionario, String preguntaStr, int orden) {
+    public Pregunta crearPregunta(Long idCuestionario, String preguntaStr, int orden, boolean opcionMultple) {
         Cuestionario cuestionario = cuestionarioRepository.findById(idCuestionario)
                 .orElseThrow(() -> new EntityNotFoundException("Cuestionario no encontrado con id " + idCuestionario));
         Pregunta pregunta = new Pregunta();
@@ -65,6 +65,7 @@ public class PreguntaService {
         preguntaSave.setCuestionario(cuestionario);
         preguntaSave.setPregunta(preguntaDTO.getPregunta());
         preguntaSave.setOrden(preguntaDTO.getOrden());
+        preguntaSave.setOpcionMultiple(preguntaDTO.isOpcionMultiple());
         
         Pregunta pregunta = preguntaRepository.save(preguntaSave);
         

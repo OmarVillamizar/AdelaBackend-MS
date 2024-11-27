@@ -11,4 +11,5 @@ public class PreguntaDTO {
     private String pregunta;
     private int orden;
     private List<OpcionDTO> opciones;
+    private boolean opcionMultiple;
 }
