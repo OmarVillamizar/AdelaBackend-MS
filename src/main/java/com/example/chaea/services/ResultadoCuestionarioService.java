@@ -99,7 +99,9 @@ public class ResultadoCuestionarioService {
                         + " tuvo mas de una opcion seleccionada(" + rp.getOpcion().getOrden() + ").");
             }
             answered.put(preguntaId, rp.getOpcion().getPregunta());
-            unAnswered.remove(preguntaId);
+            if (!rp.getOpcion().getPregunta().isOpcionMultiple()) {
+                unAnswered.remove(preguntaId);
+            }
             resultadoPreguntas.add(rp);
         }
         
@@ -172,7 +174,8 @@ public class ResultadoCuestionarioService {
     }
     
     public ListasCuestionariosDTO obtenerCuestionarios(Estudiante estudiante) {
-        List<ResultadoCuestionario> info = resultadoCuestionarioRepository.findByEstudianteAndBloqueadoFalse(estudiante);
+        List<ResultadoCuestionario> info = resultadoCuestionarioRepository
+                .findByEstudianteAndBloqueadoFalse(estudiante);
         
         List<ResultadoCuestionarioDTO> pendientes = new LinkedList<>();
         List<ResultadoCuestionarioDTO> resueltos = new LinkedList<>();
@@ -249,9 +252,9 @@ public class ResultadoCuestionarioService {
             Opcion o = rep.getOpcion();
             Pregunta p = o.getPregunta();
             PreguntaResueltaDTO pr = new PreguntaResueltaDTO();
-            if(preg.containsKey(p.getId())) {
+            if (preg.containsKey(p.getId())) {
                 pr = preg.get(p.getId());
-            }else {
+            } else {
                 pr.setPregunta(p.getPregunta());
                 pr.setRespuestas(new LinkedList<String>());
                 pr.setOrden(p.getOrden());
@@ -259,6 +262,15 @@ public class ResultadoCuestionarioService {
             pr.getRespuestas().add(o.getRespuesta());
             CategoriaResultadoDTO cr = mp.get(o.getCategoria().getId());
             cr.setValor(cr.getValor() + o.getValor());
+        }
+        
+        for(Pregunta p : c.getPreguntas()) {
+            if(!preg.containsKey(p.getId())) {
+                PreguntaResueltaDTO pr = new PreguntaResueltaDTO();
+                pr.setOrden(p.getOrden());
+                pr.setPregunta(p.getPregunta());
+                pr.setRespuestas(new LinkedList<>());
+            }
         }
         
         res.setCategorias(categorias);
@@ -281,7 +293,7 @@ public class ResultadoCuestionarioService {
         List<ResultadoCuestionario> rcs = resultadoCuestionarioRepository.findByGrupoAndCuestionario(grupo,
                 cuestionario);
         
-        for(ResultadoCuestionario rc : rcs) {
+        for (ResultadoCuestionario rc : rcs) {
             rc.setBloqueado(!rc.isBloqueado());
         }
         
