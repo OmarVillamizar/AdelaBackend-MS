@@ -170,6 +170,12 @@ public class ProfesorController {
         }
         
         Profesor profesor = profesorOptional.get();
+        Profesor prof = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        
+        if (profesor.getEmail().equalsIgnoreCase(prof.getEmail())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("No puede quitarse derechos de administrador a usted mismo.");
+        }
         
         if (profesor.getEstado() != UsuarioEstado.ACTIVA) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
