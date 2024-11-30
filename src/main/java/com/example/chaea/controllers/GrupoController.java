@@ -31,7 +31,6 @@ import com.example.chaea.entities.Profesor;
 import com.example.chaea.entities.UsuarioEstado;
 import com.example.chaea.repositories.EstudianteRepository;
 import com.example.chaea.repositories.GrupoRepository;
-import com.example.chaea.repositories.ProfesorRepository;
 
 @RestController
 @RequestMapping("/api/grupos")
@@ -39,9 +38,6 @@ public class GrupoController {
     
     @Autowired
     private GrupoRepository grupoRepository;
-    
-    @Autowired
-    private ProfesorRepository profesorRepository;
     
     @Autowired
     private EstudianteRepository estudianteRepository;
@@ -52,7 +48,7 @@ public class GrupoController {
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> crearGrupo(@RequestBody GrupoDTO grupoDTO) {
         // Validar campos requeridos
-    
+        
         if (grupoDTO.getNombre() == null || grupoDTO.getEstudiantes() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Faltan campos requeridos.");
         }
@@ -67,11 +63,11 @@ public class GrupoController {
         nuevoGrupo = grupoRepository.save(nuevoGrupo);
         // Crear un conjunto de estudiantes
         Set<Estudiante> estudiantesAsignados = new HashSet<>();
-
+        
         if (grupoDTO.getEstudiantes() != null) {
             for (EstudianteCrearDTO estudiante : grupoDTO.getEstudiantes()) {
                 String email = estudiante.getEmail();
-                if(!EMAIL_PATTERN.matcher(email).matches()) {
+                if (!EMAIL_PATTERN.matcher(email).matches()) {
                     continue;
                 }
                 String nombre = estudiante.getNombre();
@@ -106,7 +102,7 @@ public class GrupoController {
         Profesor profesor = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<GrupoResumidoDTO> gruposDTO = new LinkedList<>();
         List<Grupo> grupos = grupoRepository.findByProfesor(profesor);
-        for(Grupo grupo : grupos) {
+        for (Grupo grupo : grupos) {
             GrupoResumidoDTO grupoDT = new GrupoResumidoDTO();
             grupoDT.setId(grupo.getId());
             grupoDT.setNombre(grupo.getNombre());
@@ -170,7 +166,7 @@ public class GrupoController {
                     estudiantesAdd.add(estudiante);
                 }
             } else {
-                if(!EMAIL_PATTERN.matcher(estud.getEmail()).matches()) {
+                if (!EMAIL_PATTERN.matcher(estud.getEmail()).matches()) {
                     continue;
                 }
                 Estudiante estudiante = new Estudiante();

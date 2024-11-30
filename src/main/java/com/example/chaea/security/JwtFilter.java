@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -86,7 +85,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     } else {
                         throw new RuntimeException("El usuario no está relacionado a ninguna cuenta");
                     }
-                    //System.out.println(authenticationToken);
+                    // System.out.println(authenticationToken);
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                     

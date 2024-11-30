@@ -19,35 +19,35 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 @Table(name = "profesor")
-public class Profesor extends Usuario{
-	
-	@Column(length = 50)
-	@Getter
-	@Setter
-	@Nullable
-	private String carrera;
-	
-	@ManyToOne
-	@JoinColumn(name = "rol_id")
-	@Nullable
-	private Rol rol;
-	
-	@Column(length = 100)
-	@Getter
-	@Setter
-	@Enumerated(EnumType.STRING)
-	private ProfesorEstado estadoProfesor;
-	
-	public Profesor() {
-	    
-	}
-
-    public Profesor(String email, String nombre, String codigo, String carrera, UsuarioEstado estado, ProfesorEstado estadoProfesor) {
+public class Profesor extends Usuario {
+    
+    @Column(length = 50)
+    @Getter
+    @Setter
+    @Nullable
+    private String carrera;
+    
+    @ManyToOne
+    @JoinColumn(name = "rol_id")
+    @Nullable
+    private Rol rol;
+    
+    @Column(length = 100)
+    @Getter
+    @Setter
+    @Enumerated(EnumType.STRING)
+    private ProfesorEstado estadoProfesor;
+    
+    public Profesor() {
+        
+    }
+    
+    public Profesor(String email, String nombre, String codigo, String carrera, UsuarioEstado estado,
+            ProfesorEstado estadoProfesor) {
         super(email, nombre, codigo, estado);
         this.carrera = carrera;
         this.estadoProfesor = estadoProfesor;
         this.rol = new Rol();
     }
-	
-	
+    
 }

@@ -8,7 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.chaea.entities.Opcion;
 import com.example.chaea.entities.ResultadoPregunta;
 
-public interface ResultadoPreguntaRepository extends JpaRepository<ResultadoPregunta, Long>{
-	@Transactional @Modifying @Query("DELETE FROM ResultadoPregunta rp WHERE rp.opcion = :opcion") 
-	void deleteByOpcion(Opcion opcion); 
+public interface ResultadoPreguntaRepository extends JpaRepository<ResultadoPregunta, Long> {
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM ResultadoPregunta rp WHERE rp.opcion = :opcion")
+    void deleteByOpcion(Opcion opcion);
 }

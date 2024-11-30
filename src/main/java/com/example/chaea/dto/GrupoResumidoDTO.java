@@ -19,7 +19,7 @@ public class GrupoResumidoDTO {
     public static GrupoResumidoDTO from(Grupo g) {
         
         GrupoResumidoDTO gt = new GrupoResumidoDTO();
-        if(g == null) {
+        if (g == null) {
             return gt;
         }
         gt.setId(g.getId());

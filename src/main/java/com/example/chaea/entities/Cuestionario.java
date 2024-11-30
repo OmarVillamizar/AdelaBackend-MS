@@ -26,7 +26,7 @@ public class Cuestionario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    
     @Column(nullable = false)
     private String nombre;
     
@@ -47,7 +47,7 @@ public class Cuestionario {
     @ToString.Exclude
     @JsonManagedReference
     private Set<Pregunta> preguntas = new HashSet<>();
-
+    
     @OneToMany(mappedBy = "cuestionario", cascade = CascadeType.ALL, orphanRemoval = true)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude

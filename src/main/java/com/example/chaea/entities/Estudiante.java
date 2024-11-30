@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -23,26 +22,22 @@ import lombok.Data;
 @AllArgsConstructor
 @Table(name = "estudiante")
 public class Estudiante extends Usuario {
-
+    
     @Enumerated
     @Nullable
     private Genero genero;
-
+    
     private Date fecha_nacimiento = Date.valueOf("2000-01-01");
-
+    
     @ManyToMany
-    @JoinTable(
-        name = "matricula",
-        joinColumns = @JoinColumn(name = "estudiante_id"),
-        inverseJoinColumns = @JoinColumn(name = "curso_id")
-    )
+    @JoinTable(name = "matricula", joinColumns = @JoinColumn(name = "estudiante_id"), inverseJoinColumns = @JoinColumn(name = "curso_id"))
     @JsonBackReference
     private Set<Grupo> grupos = new HashSet<Grupo>();
-
+    
     public Estudiante() {
         super();
     }
-
+    
     public Estudiante(String email, String nombre, String codigo, Genero genero, Date fechaNac, UsuarioEstado estado) {
         super(email, nombre, codigo, estado);
         this.genero = genero;
@@ -56,12 +51,14 @@ public class Estudiante extends Usuario {
     
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Estudiante)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof Estudiante))
+            return false;
         Estudiante that = (Estudiante) o;
         return Objects.equals(getEmail(), that.getEmail());
     }
-
+    
     @Override
     public int hashCode() {
         return Objects.hash(getEmail());

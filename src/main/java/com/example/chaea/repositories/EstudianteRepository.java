@@ -10,8 +10,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EstudianteRepository extends JpaRepository<Estudiante, String> {
-
-	Optional<Estudiante> findByCodigo(String codigo);
-
+    
+    Optional<Estudiante> findByCodigo(String codigo);
     
 }

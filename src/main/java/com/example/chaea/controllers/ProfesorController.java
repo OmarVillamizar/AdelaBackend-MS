@@ -13,18 +13,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.chaea.dto.EstudianteDTO;
 import com.example.chaea.dto.ProfesorDTO;
-import com.example.chaea.entities.Estudiante;
 import com.example.chaea.entities.Profesor;
 import com.example.chaea.entities.ProfesorEstado;
-import com.example.chaea.entities.Rol;
 import com.example.chaea.entities.Usuario;
 import com.example.chaea.entities.UsuarioEstado;
 import com.example.chaea.repositories.ProfesorRepository;
@@ -235,8 +231,9 @@ public class ProfesorController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profesor : " + email);
         }
         Optional<Usuario> existente = usuarioRepository.findByCodigo(profesorDTO.getCodigo());
-        if(existente.isPresent() && !existente.get().getEmail().equals(email)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ya hay una usuario registrado con el codigo: " + profesorDTO.getCodigo());
+        if (existente.isPresent() && !existente.get().getEmail().equals(email)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Ya hay una usuario registrado con el codigo: " + profesorDTO.getCodigo());
         }
         
         Profesor profesorExistente = profesorOptional.get();

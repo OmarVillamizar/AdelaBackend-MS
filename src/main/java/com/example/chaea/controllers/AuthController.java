@@ -9,9 +9,6 @@ import org.slf4j.LoggerFactory;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +23,6 @@ import com.example.chaea.entities.UsuarioEstado;
 import com.example.chaea.repositories.UsuarioRepository;
 import com.example.chaea.security.JwtUtil;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -53,13 +49,13 @@ public class AuthController {
     public void loginSuccessEstudiante(HttpServletResponse response, HttpServletRequest request,
             OAuth2AuthenticationToken authentication, @RequestParam String redirect_to) throws IOException {
         String email = authentication.getPrincipal().getAttribute("email");
-        /*
-        if(!EMAIL_PATTERN.matcher(email).matches()) {
-            response.sendRedirect(
-                    redirect_to + "?error=Formato de correo incorrecto, '" + email + "' no es un correo institucional UFPS");
+        
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
+            response.sendRedirect(redirect_to + "?error=Formato de correo incorrecto, '" + email
+                    + "' no es un correo institucional UFPS");
             return;
         }
-        */
+        
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
         Usuario usuario;
         logger.info("will redirecto to " + redirect_to);
@@ -76,11 +72,6 @@ public class AuthController {
             if (!(usuario instanceof Estudiante)) {
                 response.sendRedirect(
                         redirect_to + "?error=El usuario " + email + " no pertenece a una cuenta de estudiante");
-                /*
-                 * return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                 * .body("Error: el usuario " + email +
-                 * " no pertenece a una cuenta de estudiante");
-                 */
                 return;
             }
             
@@ -93,13 +84,13 @@ public class AuthController {
     public void loginSuccessProfesor(OAuth2AuthenticationToken authentication, HttpServletResponse response,
             @RequestParam String redirect_to) throws IOException {
         String email = authentication.getPrincipal().getAttribute("email");
-        /*
-        if(!EMAIL_PATTERN.matcher(email).matches()) {
-            response.sendRedirect(
-                    redirect_to + "?error=Formato de correo incorrecto, '" + email + "' no es un correo institucional UFPS");
+        
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
+            response.sendRedirect(redirect_to + "?error=Formato de correo incorrecto, '" + email
+                    + "' no es un correo institucional UFPS");
             return;
         }
-        */
+        
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
         Usuario usuario;
         if (usuarioOpt.isEmpty()) {

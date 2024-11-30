@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GrupoDTO {
-	
+    
     private String nombre;
-        
+    
     private Set<EstudianteCrearDTO> estudiantes; // Usaremos los correos de los estudiantes
     
 }

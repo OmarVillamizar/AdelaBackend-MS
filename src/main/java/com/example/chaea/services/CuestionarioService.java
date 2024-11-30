@@ -31,7 +31,7 @@ public class CuestionarioService {
     
     @Autowired
     private ResultadoCuestionarioRepository resultadoCuestionarioRepository;
-
+    
     @Autowired
     private CategoriaService categoriaService;
     
@@ -92,12 +92,12 @@ public class CuestionarioService {
         
         eliminarReferenciasAsociadas(cuestionario);
         
-        for(Pregunta pregunta : cuestionario.getPreguntas()) {
+        for (Pregunta pregunta : cuestionario.getPreguntas()) {
             preguntaService.eliminarPregunta(pregunta);
         }
         cuestionario.getPreguntas().clear();
         
-        for(Categoria categoria : cuestionario.getCategorias()) {
+        for (Categoria categoria : cuestionario.getCategorias()) {
             categoriaService.eliminarCategoria(categoria);
         }
         cuestionario.getCategorias().clear();
@@ -105,11 +105,11 @@ public class CuestionarioService {
         cuestionarioRepository.delete(cuestionario);
     }
     
-    private void eliminarReferenciasAsociadas(Cuestionario cuestionario) { 
-    	resultadoCuestionarioRepository.deleteByCuestionario(cuestionario); 
-    	}
+    private void eliminarReferenciasAsociadas(Cuestionario cuestionario) {
+        resultadoCuestionarioRepository.deleteByCuestionario(cuestionario);
+    }
     
-    public Cuestionario getCuestionarioPorId(Long id) {        
+    public Cuestionario getCuestionarioPorId(Long id) {
         return cuestionarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Cuestionario no encontrado con el ID: " + id));
     }

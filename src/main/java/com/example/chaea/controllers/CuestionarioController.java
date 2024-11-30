@@ -49,7 +49,7 @@ public class CuestionarioController {
     
     @GetMapping
     @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('PROFESOR')")
-    public ResponseEntity<?> listarCuestionarios(){
+    public ResponseEntity<?> listarCuestionarios() {
         try {
             return ResponseEntity.ok(cuestionarioService.getCuestionarios());
         } catch (Exception e) {
@@ -80,113 +80,120 @@ public class CuestionarioController {
     
     @PostMapping("/{idCuestionario}/asignargrupo/{idGrupo}")
     @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('PROFESOR')")
-    public ResponseEntity<?> asignarCuestionarioAGrupo(@PathVariable Long idCuestionario, @PathVariable int idGrupo){
+    public ResponseEntity<?> asignarCuestionarioAGrupo(@PathVariable Long idCuestionario, @PathVariable int idGrupo) {
         try {
             resultadoCuestionarioService.asignarCuestionarioAGrupo(idCuestionario, idGrupo);
             return new ResponseEntity<>(HttpStatus.CREATED);
-        }catch(EntityNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
     
     @PostMapping("/{idCuestionario}/asignarestudiante")
     @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('PROFESOR')")
-    public ResponseEntity<?> asignarCuestionarioAEstudiante(@PathVariable Long idCuestionario, @RequestBody RequestEstudianteEmail estudianteEmail){
+    public ResponseEntity<?> asignarCuestionarioAEstudiante(@PathVariable Long idCuestionario,
+            @RequestBody RequestEstudianteEmail estudianteEmail) {
         try {
             resultadoCuestionarioService.asignarCuestionarioAEstudiante(idCuestionario, estudianteEmail.getEmail());
             return new ResponseEntity<>(HttpStatus.CREATED);
-        }catch(EntityNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
     
     @PostMapping("/responder")
     @PreAuthorize("hasRole('ESTUDIANTE')")
-    public ResponseEntity<?> responderCuestionario(@RequestBody RespuestaCuestionarioDTO respuesta){
+    public ResponseEntity<?> responderCuestionario(@RequestBody RespuestaCuestionarioDTO respuesta) {
         try {
-            Estudiante estudiante = (Estudiante) SecurityContextHolder.getContext().getAuthentication().getPrincipal();;
+            Estudiante estudiante = (Estudiante) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            ;
             resultadoCuestionarioService.responderCuestionario(respuesta, estudiante);
             return new ResponseEntity<>(HttpStatus.CREATED);
-        }catch(EntityNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }catch(Exception e) {
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
     
     @GetMapping("/mis-cuestionarios")
     @PreAuthorize("hasRole('ESTUDIANTE')")
-    public ResponseEntity<?> obtenerMisCuestionarios(){
+    public ResponseEntity<?> obtenerMisCuestionarios() {
         try {
-            Estudiante estudiante = (Estudiante) SecurityContextHolder.getContext().getAuthentication().getPrincipal();;
-            return new ResponseEntity<>(resultadoCuestionarioService.obtenerCuestionarios(estudiante) ,HttpStatus.OK);
-        }catch(EntityNotFoundException e) {
+            Estudiante estudiante = (Estudiante) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            ;
+            return new ResponseEntity<>(resultadoCuestionarioService.obtenerCuestionarios(estudiante), HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }catch(Exception e) {
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
     
     @GetMapping("/mis-cuestionarios/resuelto/{idResultado}")
     @PreAuthorize("hasRole('ESTUDIANTE')")
-    public ResponseEntity<?> obtenerResultadoCuestionario(@PathVariable Long idResultado){
+    public ResponseEntity<?> obtenerResultadoCuestionario(@PathVariable Long idResultado) {
         try {
             Estudiante estudiante = (Estudiante) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            return new ResponseEntity<>(resultadoCuestionarioService.obtenerResultadoCuestionario(idResultado, estudiante) ,HttpStatus.OK);
-        }catch(EntityNotFoundException e) {
+            return new ResponseEntity<>(
+                    resultadoCuestionarioService.obtenerResultadoCuestionario(idResultado, estudiante), HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }catch(Exception e) {
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
     
     @GetMapping("/reporte/{idCuestionario}/grupo/{idGrupo}")
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
-    public ResponseEntity<?> obtenerReporteGrupo(@PathVariable Long idCuestionario, @PathVariable Integer idGrupo){
+    public ResponseEntity<?> obtenerReporteGrupo(@PathVariable Long idCuestionario, @PathVariable Integer idGrupo) {
         try {
             Profesor profesor = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            return new ResponseEntity<>(resultadoCuestionarioService.obtenerResultadosGrupoCuestionario(idCuestionario, idGrupo, profesor), HttpStatus.OK);
-        }catch(EntityNotFoundException e) {
+            return new ResponseEntity<>(
+                    resultadoCuestionarioService.obtenerResultadosGrupoCuestionario(idCuestionario, idGrupo, profesor),
+                    HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }catch(Exception e) {
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
     
     @GetMapping("/reporte-estudiante/{idCuestionarioResuelto}")
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
-    public ResponseEntity<?> obtenerReporteEstudiante(@PathVariable Long idCuestionarioResuelto){
+    public ResponseEntity<?> obtenerReporteEstudiante(@PathVariable Long idCuestionarioResuelto) {
         try {
-            return new ResponseEntity<>(resultadoCuestionarioService.obtenerResultadoCuestionario(idCuestionarioResuelto), HttpStatus.OK);
-        }catch(EntityNotFoundException e) {
+            return new ResponseEntity<>(
+                    resultadoCuestionarioService.obtenerResultadoCuestionario(idCuestionarioResuelto), HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }catch(Exception e) {
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
     
     @GetMapping("/reporte/grupo/{idGrupo}")
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
-    public ResponseEntity<?> obtenerCuestionariosGrupo(@PathVariable Integer idGrupo){
+    public ResponseEntity<?> obtenerCuestionariosGrupo(@PathVariable Integer idGrupo) {
         try {
             return new ResponseEntity<>(resultadoCuestionarioService.obtenerPorGrupo(idGrupo), HttpStatus.OK);
-        }catch(EntityNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }catch(Exception e) {
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
     
     @PatchMapping("/reporte/{idCuestionario}/grupo/{idGrupo}")
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
-    public ResponseEntity<?> toggleBloqueo(@PathVariable Long idCuestionario, @PathVariable Integer idGrupo){
+    public ResponseEntity<?> toggleBloqueo(@PathVariable Long idCuestionario, @PathVariable Integer idGrupo) {
         try {
             Profesor profesor = (Profesor) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             resultadoCuestionarioService.toggleBloqueoCuestionario(idCuestionario, idGrupo, profesor);
             return new ResponseEntity<>("ok", HttpStatus.OK);
-        }catch(EntityNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }catch(Exception e) {
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

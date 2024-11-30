@@ -37,14 +37,11 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http,
             ClientRegistrationRepository clientRegistrationRepository) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
+        http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/docs/**", "/api-docs/**", "/swagger-ui/**", "/health/**", "/login/**",
-                                "/oauth2/**", "/api/**").permitAll()
-                        .requestMatchers("/test/**").authenticated()
-                        .anyRequest().authenticated()
-                        )
+                                "/oauth2/**", "/api/**")
+                        .permitAll().requestMatchers("/test/**").authenticated().anyRequest().authenticated())
                 .exceptionHandling(exc -> exc.authenticationEntryPoint((request, response, authException) -> {
                     System.out.println("Auth  exception: ");
                     authException.printStackTrace();
@@ -154,7 +151,7 @@ public class SecurityConfig {
                 falta.add("userType");
             if (redirectTo == null)
                 falta.add("redirect_to");
-                        
+            
             if (falta.size() > 0) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().write("Error: not found required parameters " + falta.toString());

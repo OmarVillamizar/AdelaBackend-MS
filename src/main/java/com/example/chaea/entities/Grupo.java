@@ -20,30 +20,32 @@ import lombok.Data;
 @Data
 @Table(name = "grupo")
 public class Grupo {
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
+    
     @Column(length = 100, nullable = false)
     private String nombre;
-
+    
     @ManyToOne
     @JoinColumn(name = "profesor_id", nullable = false)
     private Profesor profesor;
-
+    
     @ManyToMany(mappedBy = "grupos")
     @JsonManagedReference
     private Set<Estudiante> estudiantes;
-
+    
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Grupo)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof Grupo))
+            return false;
         Grupo grupo = (Grupo) o;
         return getId() == grupo.getId();
     }
-
+    
     @Override
     public int hashCode() {
         return Objects.hash(getId());

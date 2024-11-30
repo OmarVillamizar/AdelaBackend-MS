@@ -8,7 +8,6 @@ import com.example.chaea.entities.Categoria;
 import com.example.chaea.entities.Opcion;
 import com.example.chaea.entities.Pregunta;
 import com.example.chaea.repositories.CategoriaRepository;
-import com.example.chaea.repositories.CuestionarioRepository;
 import com.example.chaea.repositories.OpcionRepository;
 import com.example.chaea.repositories.PreguntaRepository;
 
@@ -16,9 +15,6 @@ import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class OpcionService {
-    
-    @Autowired
-    private CuestionarioRepository cuestionarioRepository;
     
     @Autowired
     private CategoriaRepository categoriaRepository;
@@ -63,7 +59,7 @@ public class OpcionService {
             opcion.setValor(opcionDTO.getValor());
             opcion.setOrden(opcionDTO.getOrden());
             opcion.setRespuesta(opcionDTO.getRespuesta());
-
+            
             return opcionRepository.save(opcion);
         }
         throw new RuntimeException("Inconsistencias en los cuestionarios de pregunta ("

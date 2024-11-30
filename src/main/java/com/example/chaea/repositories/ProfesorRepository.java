@@ -11,7 +11,6 @@ public interface ProfesorRepository extends JpaRepository<Profesor, String> {
     
     // Método para encontrar un profesor por su código
     Optional<Profesor> findByCodigo(String codigo);
-
-	Optional<Rol> findByEmail(String email);
+    
+    Optional<Rol> findByEmail(String email);
 }
-

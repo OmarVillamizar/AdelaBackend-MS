@@ -19,7 +19,7 @@ public class DataInitializer {
     private RolRepository rolRepository;
     
     @Bean
-    public CommandLineRunner initializeRoles() {
+    CommandLineRunner initializeRoles() {
         return args -> {
             logger.info("Starting role initialization...");
             try {

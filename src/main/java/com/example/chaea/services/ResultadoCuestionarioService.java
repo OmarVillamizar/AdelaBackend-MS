@@ -89,7 +89,7 @@ public class ResultadoCuestionarioService {
         Map<Long, Pregunta> answered = new TreeMap<>();
         Map<Long, Pregunta> unAnswered = new TreeMap<>();
         for (Pregunta pregunta : preguntas) {
-            if(!pregunta.isOpcionMultiple()) {
+            if (!pregunta.isOpcionMultiple()) {
                 unAnswered.put(pregunta.getId(), pregunta);
             }
         }
@@ -265,8 +265,8 @@ public class ResultadoCuestionarioService {
             preg.put(p.getId(), pr);
         }
         
-        for(Pregunta p : c.getPreguntas()) {
-            if(!preg.containsKey(p.getId())) {
+        for (Pregunta p : c.getPreguntas()) {
+            if (!preg.containsKey(p.getId())) {
                 PreguntaResueltaDTO pr = new PreguntaResueltaDTO();
                 pr.setOrden(p.getOrden());
                 pr.setPregunta(p.getPregunta());

@@ -45,7 +45,7 @@ public class CategoriaService {
     public Categoria crearCategoria(Cuestionario cuestionario, CategoriaDTO categoriaDTO) {
         
         Categoria categoria = new Categoria();
-                
+        
         categoria.setCuestionario(cuestionario);
         categoria.setNombre(categoriaDTO.getNombre());
         categoria.setValorMaximo(0d);

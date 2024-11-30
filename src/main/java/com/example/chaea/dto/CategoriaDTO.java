@@ -7,5 +7,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CategoriaDTO {
     private String nombre;
-    private int id; //No es el id de la bd
+    private int id; // No es el id de la bd
 }
