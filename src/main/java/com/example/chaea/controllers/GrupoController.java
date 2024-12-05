@@ -41,9 +41,7 @@ public class GrupoController {
     
     @Autowired
     private EstudianteRepository estudianteRepository;
-    
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@ufps.edu.co$");
-    
+        
     @PostMapping
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> crearGrupo(@RequestBody GrupoDTO grupoDTO) {
@@ -67,9 +65,7 @@ public class GrupoController {
         if (grupoDTO.getEstudiantes() != null) {
             for (EstudianteCrearDTO estudiante : grupoDTO.getEstudiantes()) {
                 String email = estudiante.getEmail();
-                if (!EMAIL_PATTERN.matcher(email).matches()) {
-                    continue;
-                }
+
                 String nombre = estudiante.getNombre();
                 Optional<Estudiante> estudianteOpt = estudianteRepository.findById(email);
                 if (estudianteOpt.isPresent()) {
@@ -166,9 +162,6 @@ public class GrupoController {
                     estudiantesAdd.add(estudiante);
                 }
             } else {
-                if (!EMAIL_PATTERN.matcher(estud.getEmail()).matches()) {
-                    continue;
-                }
                 Estudiante estudiante = new Estudiante();
                 estudiante.setEmail(estud.getEmail());
                 estudiante.setNombre(estud.getNombre());
@@ -194,17 +187,6 @@ public class GrupoController {
         }
         Grupo grupo = grupoOptional.get();
         List<String> emailsNoEncontrados = new ArrayList<>();
-        Set<String> errorEmail = new HashSet<String>();
-        // Validar formato de correos electrónicos
-        for (String email : emails) {
-            if (!EMAIL_PATTERN.matcher(email).matches()) {
-                errorEmail.add(email);
-            }
-        }
-        if (errorEmail.size() > 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Los siguientes correos no cumplen con el formato : " + errorEmail.toString());
-        }
         Set<Estudiante> estudiantes = new HashSet<>();
         for (String email : emails) {
             Optional<Estudiante> estudianteOpt = estudianteRepository.findById(email);
@@ -236,9 +218,6 @@ public class GrupoController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Grupo no encontrado con el ID: " + id);
         }
         Grupo grupo = grupoOptional.get();
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Formato de correo incorrecto: " + email);
-        }
         Optional<Estudiante> estudianteOpt = estudianteRepository.findById(email);
         if (!estudianteOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -262,17 +241,6 @@ public class GrupoController {
         }
         Grupo grupo = grupoOptional.get();
         List<String> emailsNoEncontrados = new ArrayList<>();
-        Set<String> errorEmail = new HashSet<String>();
-        // Validar formato de correos electrónicos
-        for (String email : emails) {
-            if (!EMAIL_PATTERN.matcher(email).matches()) {
-                errorEmail.add(email);
-            }
-        }
-        if (errorEmail.size() > 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Los siguientes correos no cumplen con el formato : " + errorEmail.toString());
-        }
         Set<Estudiante> estudiantes = new HashSet<>();
         for (String email : emails) {
             Optional<Estudiante> estudianteOpt = estudianteRepository.findById(email);

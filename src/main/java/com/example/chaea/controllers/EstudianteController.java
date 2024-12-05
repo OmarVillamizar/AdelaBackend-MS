@@ -28,10 +28,7 @@ public class EstudianteController {
     
     @Autowired
     private EstudianteRepository estudianteRepository;
-    
-    // Expresión regular para validar correos electrónicos
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@ufps.edu.co$");
-    
+        
     @GetMapping("/omero")
     @PreAuthorize("hasRole('ESTUDIANTE')")
     public String ola() {
@@ -73,10 +70,6 @@ public class EstudianteController {
     @GetMapping("/{email}")
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> consultarPorCorreo(@PathVariable String email) {
-        // Validar formato de correo electrónico
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Formato de correo incorrecto: " + email);
-        }
         
         Optional<Estudiante> estudianteOptional = estudianteRepository.findById(email);
         if (!estudianteOptional.isPresent()) {
@@ -109,10 +102,7 @@ public class EstudianteController {
         Estudiante estud = (Estudiante) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         
         String email = estud.getEmail();
-        
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Formato de correo incorrecto: " + email);
-        }
+
         List<String> errores = new LinkedList<String>();
         if (estudianteDTO.getCodigo() == null) {
             errores.add("codigo");

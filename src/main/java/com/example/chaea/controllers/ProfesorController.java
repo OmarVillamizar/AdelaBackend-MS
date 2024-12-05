@@ -39,9 +39,7 @@ public class ProfesorController {
     
     @Autowired
     private RolRepository rolRepository;
-    
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@ufps.edu.co$");
-    
+        
     /*
      * No debería de poder crear profesores, ya que estos se registran por el camino
      * de autenticación
@@ -82,10 +80,6 @@ public class ProfesorController {
     @GetMapping("/{email}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> consultarPorCorreo(@PathVariable String email) {
-        // Validar formato de correo electrónico
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Formato de correo incorrecto: " + email);
-        }
         Optional<Profesor> profesorOptional = profesorRepository.findById(email);
         if (!profesorOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profesor no encontrado con el correo: " + email);
@@ -96,10 +90,6 @@ public class ProfesorController {
     @DeleteMapping("/deactivate/{email}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> eliminarProfesor(@PathVariable String email) {
-        // Validar formato de correo electrónico
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Formato de correo incorrecto: " + email);
-        }
         Optional<Profesor> profesorOptional = profesorRepository.findById(email);
         if (!profesorOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profesor no encontrado con el correo: " + email);
@@ -113,9 +103,6 @@ public class ProfesorController {
     @PutMapping("/activate/{email}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> activarCuentaProfesor(@PathVariable String email) {
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Formato de correo incorrecto: " + email);
-        }
         Optional<Profesor> profesorOptional = profesorRepository.findById(email);
         if (!profesorOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profesor no encontrado con el correo: " + email);
@@ -135,9 +122,6 @@ public class ProfesorController {
     @PutMapping("/elevate/{email}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> elevarCuentaProfesor(@PathVariable String email) {
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Formato de correo incorrecto: " + email);
-        }
         Optional<Profesor> profesorOptional = profesorRepository.findById(email);
         if (!profesorOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profesor no encontrado con el correo: " + email);
@@ -157,9 +141,6 @@ public class ProfesorController {
     @PutMapping("/demote/{email}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> bajarCuentaProfesor(@PathVariable String email) {
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Formato de correo incorrecto: " + email);
-        }
         Optional<Profesor> profesorOptional = profesorRepository.findById(email);
         if (!profesorOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profesor no encontrado con el correo: " + email);
@@ -185,9 +166,6 @@ public class ProfesorController {
     @DeleteMapping("/reject/{email}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> rechazarSolicitudCuentaProfesor(@PathVariable String email) {
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Formato de correo incorrecto: " + email);
-        }
         Optional<Profesor> profesorOptional = profesorRepository.findById(email);
         if (!profesorOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profesor no encontrado con el correo: " + email);
@@ -211,9 +189,6 @@ public class ProfesorController {
         
         String email = prof.getEmail();
         
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Formato de correo incorrecto: " + email);
-        }
         List<String> errores = new LinkedList<String>();
         if (profesorDTO.getCodigo() == null) {
             errores.add("codigo");

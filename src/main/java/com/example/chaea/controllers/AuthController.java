@@ -42,19 +42,11 @@ public class AuthController {
     public String index() {
         return "index"; // Return index.html
     }
-    
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@ufps.edu.co$");
-    
+        
     @GetMapping("/login/success/estud")
     public void loginSuccessEstudiante(HttpServletResponse response, HttpServletRequest request,
             OAuth2AuthenticationToken authentication, @RequestParam String redirect_to) throws IOException {
         String email = authentication.getPrincipal().getAttribute("email");
-        
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
-            response.sendRedirect(redirect_to + "?error=Formato de correo incorrecto, '" + email
-                    + "' no es un correo institucional UFPS");
-            return;
-        }
         
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
         Usuario usuario;
@@ -84,12 +76,6 @@ public class AuthController {
     public void loginSuccessProfesor(OAuth2AuthenticationToken authentication, HttpServletResponse response,
             @RequestParam String redirect_to) throws IOException {
         String email = authentication.getPrincipal().getAttribute("email");
-        
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
-            response.sendRedirect(redirect_to + "?error=Formato de correo incorrecto, '" + email
-                    + "' no es un correo institucional UFPS");
-            return;
-        }
         
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
         Usuario usuario;
