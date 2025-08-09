@@ -6,9 +6,11 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -121,6 +123,29 @@ public class ResultadoCuestionarioService {
         return resultadoCuestionarioRepository.save(resC);
     }
     
+    public List<Cuestionario> obtenerCuestionariosPorGrupo(Integer grupoId) {
+        Grupo grupo = grupoRepository.findById(grupoId)
+                .orElseThrow(() -> new EntityNotFoundException("No existe el grupo con id " + grupoId));
+        
+        // Aquí obtienes los resultados (asignaciones) por grupo y extraes los cuestionarios únicos
+        List<ResultadoCuestionario> resultados = resultadoCuestionarioRepository.findByGrupo(grupo);
+        
+        // Usamos un Set para evitar duplicados
+        Set<Cuestionario> cuestionarios = new TreeSet<>((c1, c2) -> c1.getId().compareTo(c2.getId()));
+        for (ResultadoCuestionario rc : resultados) {
+            cuestionarios.add(rc.getCuestionario());
+        }
+        
+        return new LinkedList<>(cuestionarios);
+    }
+    
+    public boolean existeAsignacion(Estudiante estudiante, Cuestionario cuestionario) {
+        return resultadoCuestionarioRepository
+            .findByCuestionarioAndEstudianteAndFechaResolucionIsNull(cuestionario, estudiante)
+            .isPresent();
+    }
+
+    
     public ResultadoPregunta responderPregunta(Long opcionId, ResultadoCuestionario resC) {
         Opcion opcion = opcionRepository.findById(opcionId)
                 .orElseThrow(() -> new EntityNotFoundException("No existe la opción " + opcionId));
@@ -136,6 +161,49 @@ public class ResultadoCuestionarioService {
         
         return rp;
     }
+    
+    public void asignarCuestionariosAsignadosAlGrupoAEstudiantesNuevos(Grupo grupo, Set<Estudiante> nuevosEstudiantes) {
+        // Obtener todos los cuestionarios ya asignados al grupo
+        List<ResultadoCuestionario> asignacionesExistentes = resultadoCuestionarioRepository.findByGrupo(grupo);
+        
+        // Si el grupo no tiene cuestionarios asignados, no hay nada que hacer
+        if (asignacionesExistentes.isEmpty()) {
+            return;
+        }
+        
+        // Extraer los cuestionarios únicos del grupo con sus fechas de aplicación
+        Map<Cuestionario, Date> cuestionariosConFecha = asignacionesExistentes.stream()
+            .collect(Collectors.toMap(
+                ResultadoCuestionario::getCuestionario,
+                ResultadoCuestionario::getFechaAplicacion,
+                (existing, replacement) -> existing // En caso de duplicados, mantener el primero
+            ));
+        
+        for (Estudiante estudiante : nuevosEstudiantes) {
+            for (Map.Entry<Cuestionario, Date> entry : cuestionariosConFecha.entrySet()) {
+                Cuestionario cuestionario = entry.getKey();
+                Date fechaAplicacion = entry.getValue();
+                
+                // Verificar si ya existe una asignación para este estudiante, cuestionario y grupo específico
+                Optional<ResultadoCuestionario> existente = resultadoCuestionarioRepository
+                    .findByCuestionarioAndEstudianteAndGrupo(cuestionario, estudiante, grupo);
+                    
+                if (existente.isEmpty()) {
+                    // Crear nueva asignación solo si no existe para este grupo específico
+                    ResultadoCuestionario nuevo = new ResultadoCuestionario();
+                    nuevo.setEstudiante(estudiante);
+                    nuevo.setCuestionario(cuestionario);
+                    nuevo.setGrupo(grupo);
+                    nuevo.setFechaResolucion(null); // Sin resolver inicialmente
+                    nuevo.setBloqueado(false);
+                    nuevo.setFechaAplicacion(fechaAplicacion);
+                    
+                    resultadoCuestionarioRepository.save(nuevo);
+                }
+            }
+        }
+    }
+
     
     public void asignarCuestionarioAGrupo(Long cuestionarioId, Integer grupoId) {
         Cuestionario cuestionario = cuestionarioRepository.findById(cuestionarioId)

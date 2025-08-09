@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,9 +29,12 @@ import com.example.chaea.dto.GrupoResumidoDTO;
 import com.example.chaea.entities.Estudiante;
 import com.example.chaea.entities.Grupo;
 import com.example.chaea.entities.Profesor;
+import com.example.chaea.entities.ResultadoCuestionario;
 import com.example.chaea.entities.UsuarioEstado;
 import com.example.chaea.repositories.EstudianteRepository;
 import com.example.chaea.repositories.GrupoRepository;
+import com.example.chaea.repositories.ResultadoCuestionarioRepository;
+import com.example.chaea.services.ResultadoCuestionarioService;
 
 @RestController
 @RequestMapping("/api/grupos")
@@ -41,6 +45,12 @@ public class GrupoController {
     
     @Autowired
     private EstudianteRepository estudianteRepository;
+    
+    @Autowired
+    private ResultadoCuestionarioService resultadoCuestionarioService;
+    
+    @Autowired
+    private ResultadoCuestionarioRepository resultadoCuestionarioRepository;
         
     @PostMapping
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
@@ -205,10 +215,11 @@ public class GrupoController {
                     .body("Estudiantes no encontrados con los correos: " + emailsNoEncontrados.toString());
         }
         estudianteRepository.saveAll(estudiantes);
+        resultadoCuestionarioService.asignarCuestionariosAsignadosAlGrupoAEstudiantesNuevos(grupo, estudiantes);
         return ResponseEntity.ok(grupoRepository.save(grupo)); // Actualizar el grupo
     }
     
-    // Método para eliminar UN estudiante de un grupo
+ // Método para eliminar UN estudiante de un grupo
     @DeleteMapping("/{id}/estudiantes/{email}")
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> eliminarEstudianteDelGrupo(@PathVariable int id, @PathVariable String email) {
@@ -217,19 +228,51 @@ public class GrupoController {
         if (!grupoOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Grupo no encontrado con el ID: " + id);
         }
+        
         Grupo grupo = grupoOptional.get();
         Optional<Estudiante> estudianteOpt = estudianteRepository.findById(email);
         if (!estudianteOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Estudiante no encontrado con el correo: " + email);
+                .body("Estudiante no encontrado con el correo: " + email);
         }
+        
         Estudiante estudiante = estudianteOpt.get();
-        grupo.getEstudiantes().remove(estudiante);
-        estudiante.getGrupos().remove(grupo);
-        estudianteRepository.save(estudiante);
-        return ResponseEntity.ok(grupoRepository.save(grupo));
+        
+        // Verificar que el estudiante pertenece al grupo
+        if (!grupo.getEstudiantes().contains(estudiante)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body("El estudiante no pertenece a este grupo");
+        }
+        
+        try {
+            // 1. Eliminar las asignaciones de cuestionarios del estudiante para este grupo específico
+            List<ResultadoCuestionario> asignacionesAEliminar = resultadoCuestionarioRepository
+                .findByEstudianteAndGrupo(estudiante, grupo);
+                
+            // Solo eliminar las asignaciones no resueltas (sin fecha de resolución)
+            List<ResultadoCuestionario> asignacionesNoResueltas = asignacionesAEliminar.stream()
+                .filter(rc -> rc.getFechaResolucion() == null)
+                .collect(Collectors.toList());
+                
+            if (!asignacionesNoResueltas.isEmpty()) {
+                resultadoCuestionarioRepository.deleteAll(asignacionesNoResueltas);
+            }
+            
+            // 2. Remover el estudiante del grupo
+            grupo.getEstudiantes().remove(estudiante);
+            estudiante.getGrupos().remove(grupo);
+            
+            // 3. Guardar los cambios
+            estudianteRepository.save(estudiante);
+            Grupo grupoActualizado = grupoRepository.save(grupo);
+            
+            return ResponseEntity.ok(grupoActualizado);
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error al eliminar estudiante del grupo: " + e.getMessage());
+        }
     }
-    
     // Método para eliminar estudiantes de un grupo
     @DeleteMapping("/{id}/estudiantes")
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")

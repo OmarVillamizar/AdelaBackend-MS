@@ -14,11 +14,16 @@ import com.example.chaea.entities.Grupo;
 import com.example.chaea.entities.ResultadoCuestionario;
 
 public interface ResultadoCuestionarioRepository extends JpaRepository<ResultadoCuestionario, Long> {
-    // Método para encontrar un ResultadoCuestionario por Cuestionario, Estudiante y
+    
+	// Método para encontrar un ResultadoCuestionario por Cuestionario, Estudiante y
     // fechaResolucion null
     Optional<ResultadoCuestionario> findByCuestionarioAndEstudianteAndFechaResolucionIsNull(Cuestionario cuestionario,
             Estudiante estudiante);
-    
+    Optional<ResultadoCuestionario> findByCuestionarioAndEstudianteAndGrupo(
+    	    Cuestionario cuestionario, 
+    	    Estudiante estudiante, 
+    	    Grupo grupo
+    	);
     // Método para encontrar una lista de ResultadoCuestionario por Estudiante y
     // fechaResolucion null
     List<ResultadoCuestionario> findByEstudianteAndFechaResolucionIsNull(Estudiante estudiante);
@@ -28,6 +33,9 @@ public interface ResultadoCuestionarioRepository extends JpaRepository<Resultado
     List<ResultadoCuestionario> findByGrupo(Grupo grupo);
     
     List<ResultadoCuestionario> findByGrupoAndCuestionario(Grupo grupo, Cuestionario cuestionario);
+    
+ // En ResultadoCuestionarioRepository
+    List<ResultadoCuestionario> findByEstudianteAndGrupo(Estudiante estudiante, Grupo grupo);
     
     @Transactional
     @Modifying
