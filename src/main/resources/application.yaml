@@ -1,47 +1,66 @@
 jwt:
-    secret: ${JWT_SECRET_KEY}
+  secret: ${JWT_SECRET_KEY}
+
 spring:
-    datasource:
-        url: ${DATABASE_URL}
-        username: ${DATABASE_USERNAME}
-        password: ${DATABASE_PASSWORD}
-        driver-class-name: ${DATABASE_DRIVER_NAME}
-    jpa:
-        hibernate:
-            ddl-auto: update
-        properties: 
-            hibernate:
-                dialect: ${HIBERNATE_DIALECT}
-        generate-ddl: true
-    application:
-        name: chaea
-    security:
-        oauth2:
-            client:
-                registration:
-                    google:
-                        client-id: ${GOOGLE_CLIENT_ID}
-                        client-secret: ${GOOGLE_CLIENT_SECRET}
-                        scope: profile, email
-                provider:
-                    google:
-                        authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
-                        token-uri: https://www.googleapis.com/oauth2/v4/token
-                        user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
-                        user-name-attribute: sub
-            resourceserver:
-                jwt:
-                      issuer-uri: https://accounts.google.com
-                      jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: ${DATABASE_DRIVER_NAME}
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 5
+      minimum-idle: 2
+      # Configuración adicional para Supabase Pooler
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: ${HIBERNATE_DIALECT}
+        # CRÍTICO: Deshabilitar prepared statements para Supabase Pooler
+        jdbc:
+          use_get_generated_keys: false
+          batch_size: 0
+    generate-ddl: true
+
+  application:
+    name: chaea
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: profile, email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://www.googleapis.com/oauth2/v4/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+      resourceserver:
+        jwt:
+          issuer-uri: https://accounts.google.com
+          jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+
 cors:
   allowed-origins: ${ALLOWED_ORIGINS}
+
 springdoc:
-    api-docs:
-        enabled: true
-        path: /api-docs
-    swagger-ui:
-        enabled: true
-        path: /docs/swagger-ui.html
-        
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    enabled: true
+    path: /docs/swagger-ui.html
+
 server:
   port: ${PORT}

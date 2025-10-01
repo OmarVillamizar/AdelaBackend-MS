@@ -7,13 +7,10 @@ WORKDIR /app
 # Copy the pom.xml file
 COPY pom.xml .
 
-# Download the dependencies
-RUN mvn dependency:go-offline -B
-
 # Copy the source code
 COPY src ./src
 
-# Build the application
+# Build the application (Maven descargará las dependencias automáticamente)
 RUN mvn clean package -DskipTests
 
 
@@ -27,7 +24,7 @@ WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
 # Expose the port
-EXPOSE 8091
+EXPOSE 8081
 
 # Create a volume for the uploads
 VOLUME /app/uploads

@@ -29,11 +29,6 @@ public class Estudiante extends Usuario {
     
     private Date fecha_nacimiento = Date.valueOf("2000-01-01");
     
-    @ManyToMany
-    @JoinTable(name = "matricula", joinColumns = @JoinColumn(name = "estudiante_id"), inverseJoinColumns = @JoinColumn(name = "curso_id"))
-    @JsonBackReference
-    private Set<Grupo> grupos = new HashSet<Grupo>();
-    
     public Estudiante() {
         super();
     }
