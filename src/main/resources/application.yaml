@@ -16,6 +16,7 @@ spring:
       max-lifetime: 1800000
       leak-detection-threshold: 60000
 
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -30,7 +31,7 @@ spring:
     generate-ddl: true
 
   application:
-    name: chaea
+    name: ms-auth
 
   security:
     oauth2:
@@ -50,7 +51,9 @@ spring:
         jwt:
           issuer-uri: https://accounts.google.com
           jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
-
+  cloud:
+    compatibility-verifier:
+      enabled: false
 cors:
   allowed-origins: ${ALLOWED_ORIGINS}
 

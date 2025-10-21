@@ -15,11 +15,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.chaea.clients.UsuarioReferenciaClient;
+import com.example.chaea.dto.UsuarioReferenciaRequest;
 import com.example.chaea.entities.Estudiante;
 import com.example.chaea.entities.Profesor;
 import com.example.chaea.entities.ProfesorEstado;
 import com.example.chaea.entities.Usuario;
 import com.example.chaea.entities.UsuarioEstado;
+import com.example.chaea.enums.TipoUsuario;
 import com.example.chaea.repositories.UsuarioRepository;
 import com.example.chaea.security.JwtUtil;
 
@@ -34,6 +37,9 @@ public class AuthController {
     
     @Autowired
     private JwtUtil jwtUtil;
+    
+    @Autowired
+    private UsuarioReferenciaClient usuarioReferenciaClient;
     
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -59,6 +65,13 @@ public class AuthController {
             newUsuario.setNombre(authentication.getPrincipal().getAttribute("name"));
             usuarioRepository.save(newUsuario);
             usuario = newUsuario;
+            
+            // 📤 Enviar referencia a MS-Grupos
+            UsuarioReferenciaRequest ref = new UsuarioReferenciaRequest();
+            ref.setEmail(email);
+            ref.setTipoUsuario(TipoUsuario.ESTUDIANTE);
+            usuarioReferenciaClient.crearReferencia(ref);
+            
         } else {
             usuario = usuarioOpt.get();
             if (!(usuario instanceof Estudiante)) {
@@ -89,6 +102,13 @@ public class AuthController {
             newUsuario.setRol(null);
             usuarioRepository.save(newUsuario);
             usuario = newUsuario;
+            
+            // 📤 Enviar referencia a MS-Grupos
+            UsuarioReferenciaRequest ref = new UsuarioReferenciaRequest();
+            ref.setEmail(email);
+            ref.setTipoUsuario(TipoUsuario.PROFESOR);
+            usuarioReferenciaClient.crearReferencia(ref);
+           
         } else {
             usuario = usuarioOpt.get();
             if (!(usuario instanceof Profesor)) {
