@@ -22,6 +22,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,33 +37,33 @@ public class SecurityConfig {
     
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http,
-            ClientRegistrationRepository clientRegistrationRepository) throws Exception {
-        http.csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(authorize -> authorize
-                        // 🔓 Public endpoints
-                        .requestMatchers(
-                            "/", "/docs/**", "/api-docs/**", "/swagger-ui/**", "/health/**", 
-                            "/login/**", "/oauth2/**", "/api/grupos/**", 
-                            "/api/estudiantes/**", "/api/profesores/**"
-                        ).permitAll()
-                        // 🔒 Todo lo demás requiere autenticación
-                        .anyRequest().authenticated()
-                )
-                .exceptionHandling(exc -> exc.authenticationEntryPoint((request, response, authException) -> {
-                    System.out.println("Auth exception: ");
-                    authException.printStackTrace();
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-                }))
-                .oauth2Login(oauth2 -> oauth2
-                        .authorizationEndpoint(authorization -> authorization.authorizationRequestResolver(
-                                customAuthorizationRequestResolver(clientRegistrationRepository)))
-                        .successHandler(customAuthenticationSuccessHandler())
-                );
+            ClientRegistrationRepository clientRegistrationRepository,
+            CorsConfigurationSource corsConfigurationSource) throws Exception {
 
-        // 🔧 Añade tu filtro JWT
+        http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource)) // ✅ ahora sí existe
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers(
+                    "/", "/docs/**", "/api-docs/**", "/swagger-ui/**", "/health/**", 
+                    "/login/**", "/oauth2/**", "/api/grupos/**", 
+                    "/api/estudiantes/**", "/api/profesores/**"
+                ).permitAll()
+                .anyRequest().authenticated()
+            )
+            .exceptionHandling(exc -> exc.authenticationEntryPoint((request, response, authException) -> {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            }))
+            .oauth2Login(oauth2 -> oauth2
+                .authorizationEndpoint(authorization -> authorization.authorizationRequestResolver(
+                        customAuthorizationRequestResolver(clientRegistrationRepository)))
+                .successHandler(customAuthenticationSuccessHandler())
+            );
+
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
+
     
     // --- Resolver para OAuth2, idéntico al original ---
     private OAuth2AuthorizationRequestResolver customAuthorizationRequestResolver(
