@@ -14,9 +14,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.example.adela.clients.UsuarioReferenciaClient;
-import com.example.adela.dto.UsuarioReferenciaRequest;
 import com.example.adela.entities.Estudiante;
 import com.example.adela.entities.Profesor;
 import com.example.adela.entities.ProfesorEstado;
@@ -37,9 +34,6 @@ public class AuthController {
     
     @Autowired
     private JwtUtil jwtUtil;
-    
-    @Autowired
-    private UsuarioReferenciaClient usuarioReferenciaClient;
     
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -66,12 +60,7 @@ public class AuthController {
             usuarioRepository.save(newUsuario);
             usuario = newUsuario;
             
-            // 📤 Enviar referencia a MS-Grupos
-            UsuarioReferenciaRequest ref = new UsuarioReferenciaRequest();
-            ref.setEmail(email);
-            ref.setTipoUsuario(TipoUsuario.ESTUDIANTE);
-            usuarioReferenciaClient.crearReferencia(ref);
-            
+           
         } else {
             usuario = usuarioOpt.get();
             if (!(usuario instanceof Estudiante)) {
@@ -102,12 +91,6 @@ public class AuthController {
             newUsuario.setRol(null);
             usuarioRepository.save(newUsuario);
             usuario = newUsuario;
-            
-            // 📤 Enviar referencia a MS-Grupos
-            UsuarioReferenciaRequest ref = new UsuarioReferenciaRequest();
-            ref.setEmail(email);
-            ref.setTipoUsuario(TipoUsuario.PROFESOR);
-            usuarioReferenciaClient.crearReferencia(ref);
            
         } else {
             usuario = usuarioOpt.get();
