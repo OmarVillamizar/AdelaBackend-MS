@@ -11,10 +11,10 @@
     </parent>
     
     <groupId>com.example</groupId>
-    <artifactId>chaea</artifactId>
+    <artifactId>auth-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>chaea</name>
-    <description>REST API para automatización de perfiles de aprendizaje </description>
+    <name>auth-service</name>
+    <description>Microservicio de auth y roles para el aplicativo ADELA</description>
     <url />
     <licenses>
         <license />
@@ -120,8 +120,7 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
-
-
+  
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
