@@ -22,7 +22,7 @@ import com.example.adela.entities.UsuarioEstado;
 import com.example.adela.repositories.EstudianteRepository;
 
 @RestController
-@RequestMapping("/api/estudiantes")
+@RequestMapping("/ms-auth/estudiantes")
 public class EstudianteController {
     
     @Autowired

@@ -28,7 +28,7 @@ import com.example.adela.repositories.RolRepository;
 import com.example.adela.repositories.UsuarioRepository;
 
 @RestController
-@RequestMapping("/api/profesores")
+@RequestMapping("/ms-auth/profesores")
 public class ProfesorController {
     
     @Autowired

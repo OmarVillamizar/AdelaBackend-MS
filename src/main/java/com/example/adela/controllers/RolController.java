@@ -17,7 +17,7 @@ import com.example.adela.entities.Rol;
 import com.example.adela.repositories.RolRepository;
 
 @RestController
-@RequestMapping("/api/roles")
+@RequestMapping("/ms-auth/roles")
 public class RolController {
     
     @Autowired

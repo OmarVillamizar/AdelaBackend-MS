@@ -3,4 +3,3 @@ spring:
     name: ms-auth
   config:
     import: "optional:configserver:http://localhost:8088"
-

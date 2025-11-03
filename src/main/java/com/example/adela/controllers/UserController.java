@@ -15,7 +15,7 @@ import com.example.adela.entities.Profesor;
 import com.example.adela.entities.Usuario;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/ms-auth/user")
 public class UserController {
     @GetMapping("/info")
     @PreAuthorize("hasRole('ESTUDIANTE') or hasRole('PROFESOR') or hasRole('ESTUDIANTE_INCOMPLETO') or hasRole('PROFESOR_INCOMPLETO') or hasRole('PROFESOR_INACTIVO') or hasRole('ADMINISTRADOR')")
