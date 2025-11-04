@@ -11,11 +11,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.adela.dto.EstudianteCrearDTO;
 import com.example.adela.dto.EstudianteDTO;
 import com.example.adela.entities.Estudiante;
 import com.example.adela.entities.UsuarioEstado;
@@ -44,6 +46,23 @@ public class EstudianteController {
         }
         
         return ResponseEntity.ok(estudianteOptional.get());
+    }
+    
+    @PostMapping("/create")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<?> crearCascaras(@RequestBody List<EstudianteCrearDTO> estudiantesDto) {
+		List<Estudiante> estudiantesACrear = new LinkedList<>();
+		for (EstudianteCrearDTO estudianteDTO : estudiantesDto) {
+			Estudiante nuevoEstudiante = new Estudiante();
+			nuevoEstudiante.setEmail(estudianteDTO.getEmail());
+			nuevoEstudiante.setNombre(estudianteDTO.getNombre());
+			nuevoEstudiante.setEstado(UsuarioEstado.INCOMPLETA);
+			estudiantesACrear.add(nuevoEstudiante);
+		}
+		List<Estudiante> estudiantesCreados = estudianteRepository.saveAll(estudiantesACrear);
+		List<EstudianteDTO> dtos = estudiantesCreados.stream().map(est -> EstudianteDTO.from(est))
+				.toList();
+		return ResponseEntity.status(HttpStatus.CREATED).body(dtos);
     }
 
     @PutMapping
