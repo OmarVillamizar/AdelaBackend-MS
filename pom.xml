@@ -10,11 +10,11 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     
-    <groupId>com.example</groupId>
-    <artifactId>auth-service</artifactId>
+  	<groupId>com.example.adela</groupId>
+    <artifactId>ms-auth</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>auth-service</name>
-    <description>Microservicio de auth y roles para el aplicativo ADELA</description>
+    <name>ms-auth</name>
+    <description>Microservicio de autenticación y roles para el aplicativo ADELA</description>
     <url />
     <licenses>
         <license />
