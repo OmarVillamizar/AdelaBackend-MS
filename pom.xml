@@ -11,9 +11,9 @@
     </parent>
     
     <groupId>com.example</groupId>
-    <artifactId>auth-service</artifactId>
+    <artifactId>adela</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>auth-service</name>
+    <name>adela</name>
     <description>Microservicio de auth y roles para el aplicativo ADELA</description>
     <url />
     <licenses>
@@ -211,7 +211,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.example.chaea.ChaeaApplication</mainClass>
+                    <mainClass>com.example.adela.ChaeaApplication</mainClass>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

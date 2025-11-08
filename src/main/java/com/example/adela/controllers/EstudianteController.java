@@ -37,7 +37,7 @@ public class EstudianteController {
     }
     
     @GetMapping("/{email}")
-    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('PROFESOR') or hasRole('ESTUDIANTE')")
     public ResponseEntity<?> consultarPorCorreo(@PathVariable String email) {
         
         Optional<Estudiante> estudianteOptional = estudianteRepository.findById(email);
@@ -51,19 +51,36 @@ public class EstudianteController {
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<?> crearCascaras(@RequestBody List<EstudianteCrearDTO> estudiantesDto) {
-		List<Estudiante> estudiantesACrear = new LinkedList<>();
-		for (EstudianteCrearDTO estudianteDTO : estudiantesDto) {
-			Estudiante nuevoEstudiante = new Estudiante();
-			nuevoEstudiante.setEmail(estudianteDTO.getEmail());
-			nuevoEstudiante.setNombre(estudianteDTO.getNombre());
-			nuevoEstudiante.setEstado(UsuarioEstado.INCOMPLETA);
-			estudiantesACrear.add(nuevoEstudiante);
-		}
-		List<Estudiante> estudiantesCreados = estudianteRepository.saveAll(estudiantesACrear);
-		List<EstudianteDTO> dtos = estudiantesCreados.stream().map(est -> EstudianteDTO.from(est))
-				.toList();
-		return ResponseEntity.status(HttpStatus.CREATED).body(dtos);
+        List<Estudiante> resultado = new LinkedList<>();
+
+        for (EstudianteCrearDTO dto : estudiantesDto) {
+            // Buscar si el estudiante ya existe por email
+            Optional<Estudiante> existenteOpt = estudianteRepository.findByEmail(dto.getEmail());
+
+            Estudiante estudiante;
+            if (existenteOpt.isPresent()) {
+                // Si ya existe, lo usamos directamente (sin modificarlo)
+                estudiante = existenteOpt.get();
+            } else {
+                // Si no existe, se crea una "cáscara" (incompleta)
+                estudiante = new Estudiante();
+                estudiante.setEmail(dto.getEmail());
+                estudiante.setNombre(dto.getNombre());
+                estudiante.setEstado(UsuarioEstado.INCOMPLETA);
+                estudiante = estudianteRepository.save(estudiante);
+            }
+
+            resultado.add(estudiante);
+        }
+
+        // Convertir a DTOs
+        List<EstudianteDTO> dtos = resultado.stream()
+                .map(EstudianteDTO::from)
+                .toList();
+
+        return ResponseEntity.ok(dtos);
     }
+
 
     @PutMapping
     @PreAuthorize("hasRole('ESTUDIANTE') or hasRole('ESTUDIANTE_INCOMPLETO')")

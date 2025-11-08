@@ -40,10 +40,13 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/docs/**", "/api-docs/**", "/swagger-ui/**", "/health/**", "/login/**",
-                                "/oauth2/**", "/api/**")
-                        .permitAll().requestMatchers("/test/**").authenticated().anyRequest().authenticated())
+                                "/oauth2/**", "/api/**", "/estudiantes/**", "/profesores/**")
+                        .permitAll()
+                        .requestMatchers("/test/**").authenticated()
+                        .anyRequest().authenticated())
                 .exceptionHandling(exc -> exc.authenticationEntryPoint((request, response, authException) -> {
-                    System.out.println("Auth  exception: ");
+                    System.out.println("Auth exception: ");
+                    System.out.println("Ruta solicitada: " + request.getRequestURI());
                     authException.printStackTrace();
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
                 }))
@@ -188,5 +191,4 @@ public class SecurityConfig {
         // Configura aquí la conversión de claims, roles o cualquier otra lógica
         return converter;
     }
-    
 }
